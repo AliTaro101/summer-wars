@@ -217,6 +217,12 @@ body{background:#000;font-family:'Noto Sans JP',sans-serif;overflow:hidden;width
 .ec-bday{font-size:24px;color:#fff;margin-top:26px;animation:bdPulse 2s ease-in-out infinite;}
 @keyframes bdPulse{0%,100%{text-shadow:0 0 40px rgba(255,255,255,.4)}50%{text-shadow:0 0 60px rgba(255,255,255,.8),0 0 100px rgba(160,112,255,.4)}}
 .ec-sub{color:rgba(180,200,255,.35);font-size:12px;margin-top:8px;letter-spacing:2px;}
+.ec-nav{display:flex;gap:16px;margin-top:28px;justify-content:center;}
+.ec-nav-btn{padding:12px 32px;background:transparent;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:4px;cursor:pointer;border-radius:3px;transition:all .3s;}
+.ec-nav-btn.menu{border:1px solid rgba(160,200,255,.3);color:rgba(160,200,255,.5);}
+.ec-nav-btn.menu:hover{background:rgba(160,200,255,.08);color:#a0c8ff;}
+.ec-nav-btn.next{border:1px solid rgba(255,106,48,.5);color:#ff6a30;}
+.ec-nav-btn.next:hover{background:rgba(255,106,48,.1);box-shadow:0 0 20px rgba(255,106,48,.15);}
 </style>
 </head>
 <body>
@@ -400,6 +406,10 @@ body{background:#000;font-family:'Noto Sans JP',sans-serif;overflow:hidden;width
   <div class="ec-tbc">— TO BE CONTINUED —</div>
   <div class="ec-bday">🎉 Happy Birthday, Iason! 🎉</div>
   <div class="ec-sub">The network knows your name. Now let's find what Ali built for you.</div>
+  <div class="ec-nav">
+    <button class="ec-nav-btn menu" onclick="window.location.href='https://alitaro101.github.io/summer-wars'">← MAIN MENU</button>
+    <button class="ec-nav-btn next" onclick="window.location.href='https://alitaro101.github.io/summer-wars/summer_wars_ch3.html'">CHAPTER 3 →</button>
+  </div>
 </div>
 
 <script>
