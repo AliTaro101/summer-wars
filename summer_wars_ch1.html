@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Wars: The Birthday Protocol — Chapter 1</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;font-family:'Noto Sans JP',sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+#game{width:920px;height:580px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 80px rgba(80,160,255,0.35),0 0 160px rgba(80,160,255,0.12);}
+
+/* ═══ BACKGROUNDS ═══ */
+.bg{position:absolute;inset:0;transition:opacity 1.4s ease;}
+#bg-country{background:linear-gradient(180deg,#1a0a3a 0%,#4a1a6a 12%,#d4527a 28%,#ff8c5a 42%,#ffbe7a 55%,#ffe4a0 62%,#6abf8a 62%,#4a9a6a 75%,#2d7a4a 100%);}
+.sun-glow{position:absolute;top:55px;right:120px;width:100px;height:100px;border-radius:50%;background:radial-gradient(circle,#fffbe0 30%,#ffdd55 60%,#ff9933 80%,transparent 100%);box-shadow:0 0 60px #ffcc4488,0 0 120px #ff993344;}
+.sun-rays{position:absolute;top:15px;right:80px;width:180px;height:180px;background:radial-gradient(circle,transparent 25%,rgba(255,200,50,0.06) 50%,transparent 70%);animation:raysPulse 4s ease-in-out infinite;}
+@keyframes raysPulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+.sky-grad{position:absolute;inset:0;background:linear-gradient(180deg,rgba(80,0,140,.4) 0%,transparent 40%);}
+.horizon-glow{position:absolute;top:58%;left:0;right:0;height:40px;background:linear-gradient(transparent,rgba(255,160,60,.3),transparent);}
+.ground-layer{position:absolute;bottom:0;left:0;right:0;height:220px;background:linear-gradient(180deg,#6abf8a,#3d8a58,#2a6a3a);}
+.ground-detail{position:absolute;bottom:220px;left:0;right:0;height:30px;background:radial-gradient(ellipse 100% 100% at 50% 100%,rgba(60,160,80,.4),transparent);}
+.mt{position:absolute;bottom:215px;}
+.mt1{left:-30px;width:0;height:0;border-left:220px solid transparent;border-right:220px solid transparent;border-bottom:170px solid #3a6a4a;}
+.mt2{left:300px;width:0;height:0;border-left:180px solid transparent;border-right:180px solid transparent;border-bottom:140px solid #2d5a3a;}
+.mt3{right:20px;width:0;height:0;border-left:260px solid transparent;border-right:260px solid transparent;border-bottom:190px solid #3a6a4a;}
+.snow-cap{position:absolute;bottom:215px;}
+.snow1{left:148px;width:0;height:0;border-left:30px solid transparent;border-right:30px solid transparent;border-bottom:40px solid rgba(255,255,255,.7);}
+.snow3{right:228px;width:0;height:0;border-left:36px solid transparent;border-right:36px solid transparent;border-bottom:48px solid rgba(255,255,255,.6);}
+.cloud{position:absolute;border-radius:50px;}
+.cloud::before,.cloud::after{content:'';position:absolute;background:inherit;border-radius:50%;}
+.cloud::before{width:60%;height:180%;top:-40%;left:15%;}
+.cloud::after{width:45%;height:160%;top:-30%;right:12%;}
+.c1{width:120px;height:30px;background:rgba(255,240,220,.9);top:72px;left:50px;animation:cDrift 25s linear infinite;}
+.c2{width:90px;height:24px;background:rgba(255,230,200,.8);top:95px;left:320px;animation:cDrift 32s linear infinite reverse;}
+.c3{width:70px;height:20px;background:rgba(255,220,190,.75);top:60px;left:620px;animation:cDrift 28s linear infinite;}
+@keyframes cDrift{0%,100%{transform:translateX(0)}50%{transform:translateX(18px)}}
+.tree-group{position:absolute;bottom:215px;}
+.tr{position:relative;display:inline-block;margin:0 4px;}
+.tr-trunk{width:14px;height:55px;background:linear-gradient(#7a4a1a,#5a3010);position:absolute;bottom:0;left:50%;transform:translateX(-50%);border-radius:2px;}
+.tr-l1{width:0;height:0;border-left:45px solid transparent;border-right:45px solid transparent;border-bottom:75px solid #1a6a2a;position:absolute;bottom:38px;left:50%;transform:translateX(-50%);}
+.tr-l2{width:0;height:0;border-left:38px solid transparent;border-right:38px solid transparent;border-bottom:65px solid #228a32;position:absolute;bottom:62px;left:50%;transform:translateX(-50%);}
+.tr-l3{width:0;height:0;border-left:28px solid transparent;border-right:28px solid transparent;border-bottom:50px solid #2aaa3a;position:absolute;bottom:82px;left:50%;transform:translateX(-50%);}
+.house{position:absolute;bottom:215px;left:35px;}
+.h-body{width:190px;height:130px;background:linear-gradient(180deg,#d4a07a,#b87a50);position:relative;border-radius:2px 2px 0 0;box-shadow:inset -10px 0 20px rgba(0,0,0,.2);}
+.h-roof{width:0;height:0;border-left:110px solid transparent;border-right:110px solid transparent;border-bottom:80px solid #7a2a10;position:absolute;top:-80px;left:-15px;}
+.h-win{background:linear-gradient(135deg,#ffe8a0,#ffd060);border:4px solid #7a4a1a;border-radius:3px;position:absolute;box-shadow:0 0 15px rgba(255,200,80,.4);}
+.h-win.wl{width:38px;height:38px;top:22px;left:18px;}
+.h-win.wr{width:38px;height:38px;top:22px;right:18px;}
+.h-door{width:48px;height:68px;background:linear-gradient(180deg,#7a2a10,#5a1a00);position:absolute;bottom:0;left:50%;transform:translateX(-50%);border-radius:5px 5px 0 0;border:3px solid #3a0a00;}
+.h-chimney{width:24px;height:50px;background:#9a4a2a;position:absolute;top:-118px;right:38px;}
+.smoke-puff{width:14px;height:14px;background:rgba(220,210,200,.5);border-radius:50%;position:absolute;animation:smokeDrift 3s ease-in-out infinite;}
+.smoke-puff:nth-child(2){animation-delay:1s;left:6px;}
+.smoke-puff:nth-child(3){animation-delay:2s;left:2px;}
+@keyframes smokeDrift{0%{transform:translateY(0) scale(1);opacity:.6}100%{transform:translateY(-30px) scale(2);opacity:0}}
+.firefly{position:absolute;width:3px;height:3px;border-radius:50%;background:#aaff88;box-shadow:0 0 6px #aaff88;animation:ff 5s ease-in-out infinite;pointer-events:none;}
+@keyframes ff{0%,100%{opacity:0;transform:translate(0,0)}25%{opacity:.8}50%{opacity:.3;transform:translate(20px,-15px)}75%{opacity:.7;transform:translate(-10px,-25px)}}
+
+/* OZ BG */
+#bg-oz{background:radial-gradient(ellipse at 50% 40%,#0a1840 0%,#040d20 50%,#020810 100%);opacity:0;}
+.oz-grid-far{position:absolute;bottom:0;left:0;right:0;height:320px;background-image:linear-gradient(rgba(0,150,255,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.12) 1px,transparent 1px);background-size:60px 60px;transform:perspective(400px) rotateX(60deg);transform-origin:bottom center;animation:gridScroll 6s linear infinite;}
+@keyframes gridScroll{from{background-position:0 0}to{background-position:0 60px}}
+.oz-grid-top{position:absolute;top:0;left:0;right:0;height:280px;background-image:linear-gradient(rgba(0,150,255,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.07) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 8s linear infinite;}
+@keyframes gridMove{from{background-position:0 0}to{background-position:0 40px}}
+.oz-nebula{position:absolute;border-radius:50%;filter:blur(60px);pointer-events:none;}
+.neb1{width:300px;height:200px;top:40px;left:100px;background:rgba(100,0,200,.12);}
+.neb2{width:250px;height:180px;top:60px;right:80px;background:rgba(0,100,255,.1);}
+.oz-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(0,5,20,.7) 100%);}
+.oz-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);pointer-events:none;}
+.data-stream{position:absolute;font-family:'Share Tech Mono',monospace;font-size:8px;pointer-events:none;animation:streamFall linear infinite;}
+@keyframes streamFall{from{transform:translateY(-20px);opacity:.35}to{transform:translateY(610px);opacity:0}}
+
+/* ═══ CHARACTERS ═══ */
+.character{position:absolute;bottom:215px;transition:opacity .7s ease;}
+#char-kenji{left:330px;}
+#char-natsuki{left:455px;}
+#char-kazuma{left:200px;}
+
+/* ═══ DIALOGUE ═══ */
+#dbox{position:absolute;bottom:0;left:0;right:0;height:180px;cursor:pointer;user-select:none;z-index:10;display:none;}
+.dbox-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,30,.88),rgba(1,4,18,.97));border-top:1px solid rgba(100,180,255,.25);}
+.dbox-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#5ee6ff,#a070ff,#5ee6ff,transparent);}
+.dbox-inner{position:absolute;inset:0;padding:14px 26px;}
+#spk-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+#spk-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:4px 14px;border-radius:2px;}
+#spk-name.narrator{color:#a0c8ff;border:1px solid rgba(160,200,255,.3);background:rgba(160,200,255,.06);}
+#spk-name.kenji{color:#5ee6ff;border:1px solid rgba(94,230,255,.4);background:rgba(94,230,255,.08);}
+#spk-name.natsuki{color:#ff7aaa;border:1px solid rgba(255,122,170,.4);background:rgba(255,122,170,.08);}
+#spk-name.kazuma{color:#ff6a30;border:1px solid rgba(255,106,48,.4);background:rgba(255,106,48,.08);}
+#spk-name.system{color:#a070ff;border:1px solid rgba(160,112,255,.4);background:rgba(160,112,255,.08);}
+.spk-dot{width:6px;height:6px;border-radius:50%;animation:sDot 1.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes sDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+#dlg-text{font-size:14px;line-height:1.85;color:#d8e8ff;min-height:52px;}
+#dlg-hint{position:absolute;bottom:14px;right:26px;font-size:9px;color:rgba(150,180,255,.4);font-family:'Orbitron',sans-serif;letter-spacing:2px;animation:hBlink 1.4s ease-in-out infinite;}
+@keyframes hBlink{0%,100%{opacity:.4}50%{opacity:.9}}
+#choices{position:absolute;bottom:185px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 60px;opacity:0;pointer-events:none;transition:opacity .4s;z-index:11;}
+#choices.show{opacity:1;pointer-events:all;}
+.choice-btn{width:100%;max-width:680px;padding:11px 22px;background:linear-gradient(135deg,rgba(0,20,70,.9),rgba(0,40,100,.85));border:1px solid rgba(94,230,255,.3);border-radius:4px;color:#c8e8ff;font-family:'Noto Sans JP',sans-serif;font-size:13px;text-align:left;cursor:pointer;transition:all .25s;position:relative;}
+.choice-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#5ee6ff,#a070ff);opacity:0;transition:opacity .2s;}
+.choice-btn:hover{border-color:rgba(94,230,255,.7);transform:translateX(4px);}
+.choice-btn:hover::before{opacity:1;}
+.choice-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.4);letter-spacing:3px;margin-bottom:3px;}
+
+/* NOTIFICATION */
+#notif{position:absolute;top:18px;right:18px;background:linear-gradient(135deg,rgba(0,10,40,.95),rgba(0,20,60,.98));border:1px solid rgba(94,230,255,.4);border-radius:6px;padding:14px 18px;width:260px;transform:translateX(320px);transition:transform .6s cubic-bezier(.175,.885,.32,1.275);z-index:30;box-shadow:0 0 30px rgba(94,230,255,.15);}
+#notif.show{transform:translateX(0);}
+.notif-bar{height:2px;background:linear-gradient(90deg,#5ee6ff,#a070ff);border-radius:1px;margin-bottom:10px;animation:nBar 2s ease-in-out infinite;}
+@keyframes nBar{0%,100%{opacity:1}50%{opacity:.4}}
+.notif-tag{font-family:'Orbitron',sans-serif;font-size:8px;color:#ff6a30;letter-spacing:3px;margin-bottom:6px;}
+.notif-row{display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(94,230,255,.5);margin-top:3px;}
+.notif-val{color:rgba(160,200,255,.7);}
+
+/* EMOTION */
+#emotion-badge{position:absolute;top:18px;left:50%;transform:translateX(-50%) translateY(-60px);background:linear-gradient(135deg,rgba(10,20,60,.95),rgba(5,10,40,.98));border:1px solid rgba(255,200,80,.3);border-radius:30px;padding:7px 20px;font-size:12px;color:#ffe080;transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:35;white-space:nowrap;}
+#emotion-badge.show{transform:translateX(-50%) translateY(0);}
+
+/* ═══ PUZZLE ═══ */
+#puzzle-overlay{position:absolute;inset:0;z-index:40;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .6s;}
+#puzzle-overlay.active{opacity:1;pointer-events:all;}
+.pz-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,rgba(5,15,50,.97),rgba(1,5,20,.99));}
+.pz-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 4px,rgba(0,0,0,.1) 4px,rgba(0,0,0,.1) 5px);pointer-events:none;}
+.pz-corner{position:absolute;width:18px;height:18px;border-color:rgba(94,230,255,.5);border-style:solid;}
+.pz-corner.tl{top:12px;left:12px;border-width:2px 0 0 2px;}
+.pz-corner.tr{top:12px;right:12px;border-width:2px 2px 0 0;}
+.pz-corner.bl{bottom:12px;left:12px;border-width:0 0 2px 2px;}
+.pz-corner.br{bottom:12px;right:12px;border-width:0 2px 2px 0;}
+.pz-content{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;}
+.pz-eyebrow{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(94,230,255,.4);letter-spacing:6px;margin-bottom:6px;}
+.pz-title{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;letter-spacing:3px;background:linear-gradient(135deg,#5ee6ff,#a070ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:5px;}
+.pz-desc{font-size:12px;color:rgba(160,190,255,.5);letter-spacing:1px;max-width:480px;text-align:center;line-height:1.6;margin-bottom:14px;}
+.pz-progress-wrap{width:460px;display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.pz-progress-bar{flex:1;height:4px;background:rgba(94,230,255,.1);border-radius:2px;overflow:hidden;}
+.pz-progress-fill{height:100%;background:linear-gradient(90deg,#5ee6ff,#a070ff);border-radius:2px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.pz-progress-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.5);letter-spacing:2px;white-space:nowrap;}
+.pz-slots{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;width:680px;margin-bottom:14px;}
+.pz-slot{height:72px;border:1px dashed rgba(94,230,255,.2);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;background:rgba(0,20,60,.2);transition:all .3s;position:relative;overflow:hidden;}
+.pz-slot .slot-num{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.25);letter-spacing:3px;}
+.pz-slot .slot-ph{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(94,230,255,.2);}
+.pz-slot.drag-over{border-color:#ff9a5c;background:rgba(255,100,30,.08);}
+.pz-slot.filled{border-color:rgba(94,230,255,.5);background:rgba(0,60,120,.25);border-style:solid;}
+.pz-slot.correct{border-color:#00ff88;background:rgba(0,255,136,.06);box-shadow:0 0 16px rgba(0,255,136,.1) inset;}
+.pz-slot.wrong{border-color:#ff4466;background:rgba(255,40,80,.06);animation:shake .4s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-4px)}75%{transform:translateX(4px)}}
+.slot-fc{display:flex;flex-direction:column;align-items:center;gap:3px;width:100%;padding:0 8px;}
+.slot-fl{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(94,230,255,.4);letter-spacing:2px;}
+.slot-fv{font-family:'Share Tech Mono',monospace;font-size:11px;color:#aee6ff;text-align:center;}
+.pz-fragments{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;width:680px;}
+.pz-frag{width:155px;height:62px;background:linear-gradient(135deg,rgba(0,20,70,.9),rgba(0,40,100,.9));border:1px solid rgba(94,230,255,.35);border-radius:6px;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:grab;transition:all .2s;user-select:none;position:relative;}
+.pz-frag::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,rgba(94,230,255,.4),transparent);}
+.pz-frag:hover{border-color:#5ee6ff;box-shadow:0 0 20px rgba(94,230,255,.2);transform:translateY(-3px) scale(1.02);}
+.pz-frag.dragging{opacity:.4;}
+.pz-frag.used{opacity:.15;pointer-events:none;filter:grayscale(1);}
+.frag-type{font-family:'Orbitron',sans-serif;font-size:7px;color:rgba(94,230,255,.4);letter-spacing:3px;margin-bottom:3px;}
+.frag-val{font-family:'Share Tech Mono',monospace;font-size:11px;color:#c8e8ff;}
+#pz-check-btn{margin-top:12px;padding:11px 44px;background:linear-gradient(135deg,rgba(94,230,255,.08),rgba(160,112,255,.08));border:1px solid rgba(94,230,255,.4);color:#5ee6ff;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:4px;cursor:pointer;border-radius:3px;transition:all .3s;display:none;}
+#pz-check-btn:hover{background:linear-gradient(135deg,rgba(94,230,255,.15),rgba(160,112,255,.15));box-shadow:0 0 30px rgba(94,230,255,.15);}
+#pz-status{font-family:'Share Tech Mono',monospace;font-size:11px;height:18px;margin-top:8px;letter-spacing:2px;}
+.pz-pool-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.3);letter-spacing:4px;margin-bottom:10px;text-align:center;}
+
+/* CHAPTER TITLE */
+#chapter-title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:radial-gradient(ellipse at 50% 50%,#0a0520,#020208);}
+#title-stars{position:absolute;inset:0;}
+.t-line{width:200px;height:1px;background:linear-gradient(90deg,transparent,rgba(94,230,255,.6),transparent);margin:16px auto;}
+.pre-title{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.45);letter-spacing:8px;margin-bottom:6px;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,#5ee6ff,#a070ff,#5ee6ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(160,200,255,.4);letter-spacing:4px;margin-bottom:28px;}
+.ch-num{font-family:'Orbitron',sans-serif;font-size:54px;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(94,230,255,.3);line-height:1;}
+.ch-title{font-size:28px;font-weight:700;color:#fff;letter-spacing:4px;}
+.ch-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(200,220,255,.4);letter-spacing:3px;margin-top:6px;}
+.start-btn{margin-top:40px;padding:13px 48px;background:transparent;border:1px solid rgba(94,230,255,.5);color:#5ee6ff;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:5px;cursor:pointer;transition:all .3s;position:relative;z-index:101;}
+.start-btn:hover{background:rgba(94,230,255,.08);box-shadow:0 0 30px rgba(94,230,255,.2);}
+
+/* SCENE FLASH */
+#scene-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:50;transition:opacity .25s;}
+
+/* END CARD */
+#end-card{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#0a051e,#020208);z-index:55;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 2s;}
+#end-card.show{opacity:1;pointer-events:all;}
+.ec-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.4);letter-spacing:6px;}
+.ec-line{width:160px;height:1px;background:linear-gradient(90deg,transparent,rgba(94,230,255,.4),transparent);margin:14px auto;}
+.ec-title{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#5ee6ff,#a070ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;}
+.ec-text{color:rgba(190,210,255,.65);font-size:13px;line-height:1.9;text-align:center;max-width:540px;margin:14px 0;}
+.ec-tbc{font-family:'Orbitron',sans-serif;font-size:12px;color:#ff9a5c;letter-spacing:8px;}
+.ec-bday{font-size:24px;color:#fff;margin-top:26px;animation:bdPulse 2s ease-in-out infinite;}
+@keyframes bdPulse{0%,100%{text-shadow:0 0 40px rgba(255,255,255,.4)}50%{text-shadow:0 0 60px rgba(255,255,255,.7),0 0 100px rgba(180,140,255,.3)}}
+.ec-sub{color:rgba(180,200,255,.35);font-size:12px;margin-top:8px;letter-spacing:2px;}
+</style>
+</head>
+<body>
+<div id="game">
+
+<!-- BACKGROUNDS -->
+<div class="bg" id="bg-country">
+  <div class="sky-grad"></div><div class="sun-rays"></div><div class="sun-glow"></div>
+  <div class="horizon-glow"></div>
+  <div class="mt mt1"></div><div class="mt mt2"></div><div class="mt mt3"></div>
+  <div class="snow-cap"><div class="snow1"></div></div>
+  <div class="cloud c1"></div><div class="cloud c2"></div><div class="cloud c3"></div>
+  <div class="firefly" style="left:210px;bottom:260px;animation-delay:0s;"></div>
+  <div class="firefly" style="left:560px;bottom:300px;animation-delay:1.5s;"></div>
+  <div class="firefly" style="left:410px;bottom:278px;animation-delay:3s;"></div>
+  <div class="ground-detail"></div><div class="ground-layer"></div>
+  <div class="tree-group" style="left:595px">
+    <div class="tr" style="height:100px"><div class="tr-trunk"></div><div class="tr-l1"></div><div class="tr-l2"></div><div class="tr-l3"></div></div>
+    <div class="tr" style="height:118px"><div class="tr-trunk"></div><div class="tr-l1"></div><div class="tr-l2"></div><div class="tr-l3"></div></div>
+    <div class="tr" style="height:92px"><div class="tr-trunk"></div><div class="tr-l1"></div><div class="tr-l2"></div><div class="tr-l3"></div></div>
+    <div class="tr" style="height:108px"><div class="tr-trunk"></div><div class="tr-l1"></div><div class="tr-l2"></div><div class="tr-l3"></div></div>
+  </div>
+  <div class="house">
+    <div class="h-chimney"></div>
+    <div style="position:absolute;top:-135px;right:40px"><div class="smoke-puff"></div><div class="smoke-puff"></div><div class="smoke-puff"></div></div>
+    <div class="h-body"><div class="h-roof"></div><div class="h-win wl"></div><div class="h-win wr"></div><div class="h-door"></div></div>
+  </div>
+</div>
+
+<div class="bg" id="bg-oz">
+  <div class="oz-nebula neb1"></div><div class="oz-nebula neb2"></div>
+  <div class="oz-grid-far"></div><div class="oz-grid-top"></div>
+  <div id="oz-stars-c"></div><div id="oz-streams-c"></div>
+  <div class="oz-vignette"></div><div class="oz-scanline"></div>
+</div>
+
+<!-- CHARACTERS -->
+<div class="character" id="char-kenji" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none">
+  <ellipse cx="44" cy="170" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/>
+  <rect x="22" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><rect x="46" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/>
+  <ellipse cx="31" cy="170" rx="12" ry="6" fill="#1a1a2a"/><ellipse cx="55" cy="170" rx="12" ry="6" fill="#1a1a2a"/>
+  <rect x="16" y="56" width="56" height="68" rx="6" fill="#3a6ab8"/>
+  <path d="M36 56 L44 70 L52 56" fill="#fff" opacity="0.9"/>
+  <rect x="4" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><rect x="70" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/>
+  <ellipse cx="11" cy="110" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="77" cy="110" rx="8" ry="7" fill="#f5c9a0"/>
+  <rect x="18" y="96" width="52" height="30" rx="3" fill="#181828"/>
+  <rect x="21" y="99" width="46" height="24" rx="2" fill="#1a3a6a"/>
+  <rect x="23" y="101" width="42" height="20" rx="1" fill="#0d2448"/>
+  <defs><linearGradient id="sg"><stop offset="0%" stop-color="#00aaff" stop-opacity="0.4"/><stop offset="100%" stop-color="#0044aa" stop-opacity="0.1"/></linearGradient></defs>
+  <rect x="23" y="101" width="42" height="20" rx="1" fill="url(#sg)" opacity="0.7"/>
+  <rect x="36" y="46" width="16" height="14" rx="4" fill="#f5c9a0"/>
+  <ellipse cx="44" cy="34" rx="27" ry="28" fill="#f5c9a0"/>
+  <path d="M17 28 C17 10 28 4 44 4 C60 4 71 10 71 28 L68 22 C65 12 56 8 44 8 C32 8 23 12 20 22 Z" fill="#1a1a2e"/>
+  <rect x="17" y="26" width="6" height="14" rx="3" fill="#1a1a2e"/><rect x="65" y="26" width="6" height="14" rx="3" fill="#1a1a2e"/>
+  <ellipse cx="17" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="71" cy="34" rx="5" ry="6" fill="#f0b898"/>
+  <rect x="23" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/>
+  <rect x="47" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/>
+  <line x1="41" y1="34" x2="47" y2="34" stroke="#2a2a3a" stroke-width="2"/>
+  <circle cx="32" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="56" cy="35" r="3.5" fill="#2a1a0a"/>
+  <circle cx="33" cy="34" r="1" fill="white"/><circle cx="57" cy="34" r="1" fill="white"/>
+  <path d="M38 44 Q44 48 50 44" stroke="#c4845a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <ellipse cx="25" cy="40" rx="6" ry="3" fill="rgba(255,140,100,0.25)"/><ellipse cx="63" cy="40" rx="6" ry="3" fill="rgba(255,140,100,0.25)"/>
+</svg>
+</div>
+
+<div class="character" id="char-natsuki" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none">
+  <ellipse cx="44" cy="170" rx="26" ry="5" fill="rgba(0,0,0,0.2)"/>
+  <rect x="24" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/><rect x="50" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/>
+  <ellipse cx="31" cy="168" rx="11" ry="5" fill="#c83060"/><ellipse cx="57" cy="168" rx="11" ry="5" fill="#c83060"/>
+  <path d="M14 108 Q20 148 44 148 Q68 148 74 108 Z" fill="#c83060"/>
+  <rect x="20" y="58" width="48" height="52" rx="6" fill="#e8407a"/>
+  <rect x="6" y="62" width="16" height="44" rx="6" fill="#e8407a"/><rect x="66" y="62" width="16" height="44" rx="6" fill="#e8407a"/>
+  <ellipse cx="14" cy="108" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="74" cy="108" rx="8" ry="7" fill="#f5c9a0"/>
+  <rect x="36" y="48" width="16" height="14" rx="4" fill="#f5c9a0"/>
+  <ellipse cx="44" cy="34" rx="26" ry="27" fill="#f5c9a0"/>
+  <ellipse cx="44" cy="28" rx="28" ry="26" fill="#c8602a"/>
+  <path d="M16 28 C16 8 28 2 44 2 C60 2 72 8 72 28" fill="#e07030"/>
+  <ellipse cx="18" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="70" cy="34" rx="5" ry="6" fill="#f0b898"/>
+  <ellipse cx="33" cy="35" rx="6" ry="7" fill="#1a0a0a"/><ellipse cx="55" cy="35" rx="6" ry="7" fill="#1a0a0a"/>
+  <ellipse cx="33" cy="34" rx="5" ry="6" fill="#3a1060"/><ellipse cx="55" cy="34" rx="5" ry="6" fill="#3a1060"/>
+  <circle cx="36" cy="31" r="2" fill="white" opacity="0.9"/><circle cx="58" cy="31" r="2" fill="white" opacity="0.9"/>
+  <path d="M37 44 Q44 50 51 44" stroke="#c4645a" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <ellipse cx="24" cy="40" rx="7" ry="4" fill="rgba(255,120,100,0.35)"/><ellipse cx="64" cy="40" rx="7" ry="4" fill="rgba(255,120,100,0.35)"/>
+</svg>
+</div>
+
+<div class="character" id="char-kazuma" style="opacity:0;">
+<svg width="80" height="165" viewBox="0 0 80 165" fill="none">
+  <ellipse cx="40" cy="160" rx="24" ry="5" fill="rgba(0,0,0,0.25)"/>
+  <rect x="18" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><rect x="44" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/>
+  <ellipse cx="26" cy="158" rx="11" ry="5" fill="#0a0a1a"/><ellipse cx="52" cy="158" rx="11" ry="5" fill="#0a0a1a"/>
+  <rect x="12" y="54" width="56" height="62" rx="8" fill="#1a1a2e"/>
+  <rect x="22" y="90" width="36" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <path d="M28 54 L40 68 L52 54" fill="#141428" opacity="0.8"/>
+  <rect x="0" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><rect x="66" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/>
+  <ellipse cx="7" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="73" cy="106" rx="8" ry="7" fill="#f5c9a0"/>
+  <rect x="68" y="94" width="10" height="18" rx="2" fill="#0a0a18" stroke="rgba(94,230,255,0.4)" stroke-width="1"/>
+  <rect x="69" y="96" width="8" height="14" rx="1" fill="rgba(0,100,200,0.6)"/>
+  <rect x="32" y="44" width="16" height="14" rx="4" fill="#f5c9a0"/>
+  <ellipse cx="40" cy="30" rx="25" ry="26" fill="#f5c9a0"/>
+  <path d="M15 26 C15 8 26 2 40 2 C54 2 65 8 65 26 L62 20 C58 10 50 6 40 6 C30 6 22 10 18 20 Z" fill="#8a1a1a"/>
+  <path d="M25 8 L22 0 L30 8" fill="#aa2222"/><path d="M38 4 L40 -2 L42 4" fill="#aa2222"/><path d="M52 8 L58 0 L50 8" fill="#aa2222"/>
+  <ellipse cx="15" cy="30" rx="5" ry="6" fill="#f0b898"/><ellipse cx="65" cy="30" rx="5" ry="6" fill="#f0b898"/>
+  <path d="M22 28 L32 26 L32 34 L22 34 Z" fill="#1a0808"/><path d="M48 28 L58 26 L58 34 L48 34 Z" fill="#1a0808"/>
+  <ellipse cx="27" cy="30" rx="4" ry="4" fill="#8a2020"/><ellipse cx="53" cy="30" rx="4" ry="4" fill="#8a2020"/>
+  <circle cx="29" cy="28" r="1.5" fill="white" opacity="0.8"/><circle cx="55" cy="28" r="1.5" fill="white" opacity="0.8"/>
+  <path d="M20 24 L34 22" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M46 22 L60 24" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/>
+  <path d="M34 40 Q40 43 46 40" stroke="#c4645a" stroke-width="1.5" fill="none" stroke-linecap="round"/>
+  <path d="M15 22 C15 8 25 2 40 2 C55 2 65 8 65 22" stroke="#2a2a4a" stroke-width="5" fill="none"/>
+  <rect x="11" y="20" width="8" height="12" rx="3" fill="#2a2a4a" stroke="#3a3a5a" stroke-width="1"/>
+  <rect x="61" y="20" width="8" height="12" rx="3" fill="#2a2a4a" stroke="#3a3a5a" stroke-width="1"/>
+</svg>
+</div>
+
+<!-- NOTIFICATION -->
+<div id="notif">
+  <div class="notif-bar"></div>
+  <div class="notif-tag">⚡ PRIORITY TRANSMISSION</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#5ee6ff;margin-bottom:8px;">Unknown Encrypted Packet</div>
+  <div class="notif-row"><span>ORIGIN</span><span class="notif-val">???.???.UNKNOWN</span></div>
+  <div class="notif-row"><span>CIPHER</span><span class="notif-val">AES-∞ [CUSTOM]</span></div>
+  <div class="notif-row"><span>STATUS</span><span class="notif-val" style="color:#ff6a30">UNRESOLVED ⚠</span></div>
+</div>
+
+<!-- EMOTION -->
+<div id="emotion-badge">✨</div>
+<div id="scene-flash"></div>
+
+<!-- CHOICES -->
+<div id="choices"></div>
+
+<!-- PUZZLE -->
+<div id="puzzle-overlay">
+  <div class="pz-bg"></div><div class="pz-scan"></div>
+  <div class="pz-corner tl"></div><div class="pz-corner tr"></div>
+  <div class="pz-corner bl"></div><div class="pz-corner br"></div>
+  <div class="pz-content">
+    <div class="pz-eyebrow">OZ SECURE CHANNEL // UNKNOWN SENDER // LAYER 7</div>
+    <div class="pz-title">RECONSTRUCT THE SIGNAL</div>
+    <div class="pz-desc">Four scrambled fragments hidden across the packet stream. Drag each one into the correct slot to reveal who sent this — and why.</div>
+    <div class="pz-progress-wrap">
+      <div class="pz-progress-bar"><div class="pz-progress-fill" id="pz-fill" style="width:0%"></div></div>
+      <div class="pz-progress-label" id="pz-prog">0 / 4 DECODED</div>
+    </div>
+    <div class="pz-slots" id="pz-slots"></div>
+    <div class="pz-pool-label">▼ DRAG FRAGMENTS INTO SLOTS ABOVE</div>
+    <div class="pz-fragments" id="pz-frags"></div>
+    <div id="pz-status"></div>
+    <button id="pz-check-btn" onclick="submitPuzzle()">⟨ TRANSMIT DECRYPTION ⟩</button>
+  </div>
+</div>
+
+<!-- DIALOGUE -->
+<div id="dbox" onclick="handleClick()">
+  <div class="dbox-bg"></div><div class="dbox-accent"></div>
+  <div class="dbox-inner">
+    <div id="spk-wrap"><div class="spk-dot" id="spk-dot"></div><div id="spk-name" class="narrator">NARRATOR</div></div>
+    <div id="dlg-text"></div>
+  </div>
+  <div id="dlg-hint">▼ CLICK TO CONTINUE</div>
+</div>
+
+<!-- CHAPTER TITLE -->
+<div id="chapter-title">
+  <div id="title-stars"></div>
+  <div class="pre-title">A BIRTHDAY PROTOCOL PRODUCTION</div>
+  <div class="game-title">SUMMER WARS</div>
+  <div class="game-sub">THE BIRTHDAY PROTOCOL</div>
+  <div class="t-line"></div>
+  <div class="ch-num">01</div>
+  <div class="ch-title">SUMMER REUNION</div>
+  <div class="ch-sub">— UEDA, NAGANO · LATE AUGUST —</div>
+  <button class="start-btn" onclick="startGame()">▶ &nbsp; BEGIN</button>
+</div>
+
+<!-- END CARD -->
+<div id="end-card">
+  <div class="ec-label">END OF CHAPTER ONE</div>
+  <div class="ec-line"></div>
+  <div class="ec-title">A.L.I — WHO IS THIS?</div>
+  <div class="ec-text">Someone went inside the world's largest network and built something — not for themselves, but for someone else. They hid it deep, encrypted it completely, and left just enough of a trail for the right people to find. Three letters. A. L. I. And a message that says: your friend went all the way into the internet for you.</div>
+  <div class="ec-text" style="color:rgba(255,154,92,0.6);font-size:12px;">Somewhere in the deep architecture, something old stirs. It recognises the signal. It's been watching this kind of dedication before.</div>
+  <div class="ec-tbc">— TO BE CONTINUED —</div>
+  <div class="ec-bday">🎉 Happy Birthday, Iason! 🎉</div>
+  <div class="ec-sub">Someone built this world just for you.</div>
+</div>
+
+</div>
+
+<script>
+/* ── STARS ── */
+const ozSC=document.getElementById('oz-stars-c');
+for(let i=0;i<100;i++){const s=document.createElement('div');const sz=Math.random()*2.5+.5;const cols=['#ffffff','#aaddff','#ccaaff','#ffeeaa'];s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:${cols[i%4]};top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.7+.1};animation:tw${i%3} ${2+Math.random()*5}s ease-in-out infinite ${Math.random()*5}s;`;ozSC.appendChild(s);}
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes tw0{0%,100%{opacity:.8}50%{opacity:.05}}@keyframes tw1{0%,100%{opacity:.5}40%{opacity:.1}}@keyframes tw2{0%,100%{opacity:.9}60%{opacity:.15}}</style>');
+const tsC=document.getElementById('title-stars');
+for(let i=0;i<60;i++){const s=document.createElement('div');const sz=Math.random()*2+.5;s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:white;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.5+.1};animation:tw0 ${3+Math.random()*4}s ease-in-out infinite ${Math.random()*4}s;`;tsC.appendChild(s);}
+const srC=document.getElementById('oz-streams-c');
+const JP='アイウエオカキクサシスタチツナニヌ0123456789ABCDEF∞∑∆Ω';
+function spawnStream(){const d=document.createElement('div');d.className='data-stream';d.style.left=Math.random()*920+'px';d.style.top='-20px';d.style.color=Math.random()>.5?'rgba(94,230,255,.15)':'rgba(160,112,255,.12)';d.style.animationDuration=(8+Math.random()*8)+'s';let t='';for(let i=0;i<8;i++)t+=JP[Math.floor(Math.random()*JP.length)]+'\n';d.textContent=t;srC.appendChild(d);setTimeout(()=>d.remove(),16000);}
+setInterval(spawnStream,700);
+
+/* ══ SCENES ══
+   CORRECTED STORY:
+   - Ali is the mysterious sender who built the birthday gift inside Oz
+   - Iason is the birthday boy being celebrated — the one the gift is FOR
+   - Three letters = A.L.I (not I.A.S)
+   - The packet origin is unknown/encrypted — Ali hid themselves completely
+*/
+const SCENES=[
+/* 0 */{sp:'NARRATOR',cls:'narrator',txt:'The valley exhales a long, golden breath. Cicadas call from the cedar trees. It is late summer in Ueda — and the Jinnouchi estate smells of curry, rice wine, and thirty years of family dinners served too loudly.',chars:{},bg:'country',emotion:null},
+/* 1 */{sp:'NARRATOR',cls:'narrator',txt:'A year has passed since the incident with Love Machine. Oz recovered. The world moved on. The Jinnouchis didn\'t need to — they were always going to be fine.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null},
+/* 2 */{sp:'NATSUKI',cls:'natsuki',txt:'Kenji! She\'s been at the gate for fifteen minutes. You know what Grandma does when she has to wait at her own gate.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:'😬 Late again'},
+/* 3 */{sp:'KENJI',cls:'kenji',txt:'I\'m here, I\'m here — the train was delayed and then there was a weird flag in my Oz feed at Nagano station and I had to—',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null,
+  choices:[
+    {label:'A — Own it',txt:'...okay I got distracted by Oz. I\'m sorry. Please don\'t tell your grandma.'},
+    {label:'B — Blame the train',txt:'The Nagano line was delayed! I have a screenshot! It\'s documented!'},
+    {label:'C — Technically on time',txt:'The invitation said "around noon." It is currently... around noon. Technically.'}
+  ]},
+/* 4 */{sp:'KAZUMA',cls:'kazuma',txt:'(not looking up) All three of those were bad. Come on, the curry\'s ready.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:'😏 Classic Kazuma'},
+/* 5 */{sp:'NARRATOR',cls:'narrator',txt:'The courtyard is exactly what it always is — too loud, too full, completely right. Someone\'s toddler is running with a rice cracker like it\'s a weapon. The Jinnouchi family, eternal and unchanging.',chars:{kenji:1},bg:'country',emotion:null},
+/* 6 */{sp:'KENJI',cls:'kenji',txt:'(stops walking, squinting at his terminal) ...That\'s strange.',chars:{kenji:1},bg:'country',emotion:'🤔 Something\'s off...'},
+/* 7 */{sp:'KAZUMA',cls:'kazuma',txt:'(appears from nowhere) You\'ve had that face since Nagano. What.',chars:{kenji:1,kazuma:1},bg:'country',emotion:null},
+/* 8 */{sp:'KENJI',cls:'kenji',txt:'A packet in my Oz inbox. No sender authentication. No return address. The encryption doesn\'t match anything in Oz\'s standard stack — it\'s completely custom. Someone built their own cipher layer on top of the network.',chars:{kenji:1,kazuma:1},bg:'country',notif:true,emotion:'⚠ Custom cipher!',
+  choices:[
+    {label:'A — Is this an attack?',txt:'Kenji: First instinct — is this another Love Machine situation? Because I really don\'t want that summer again.'},
+    {label:'B — Someone\'s showing off',txt:'Kenji: Whoever built this didn\'t need to be subtle. They\'re showing off that they can do this. That\'s almost more unsettling than if it were hostile.'},
+    {label:'C — This is impressive',txt:'Kenji: I\'m not going to lie — whoever wrote this cipher is on a completely different level. I\'m kind of annoyed I didn\'t think of it first.'}
+  ]},
+/* 9 */{sp:'KAZUMA',cls:'kazuma',txt:'(actually looking up from his phone) Show me.',chars:{kenji:1,kazuma:1},bg:'country',emotion:null},
+/* 10 */{sp:'NATSUKI',cls:'natsuki',txt:'(arriving) What are you two doing hunched over a laptop at a family gathering. Again.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null},
+/* 11 */{sp:'KENJI',cls:'kenji',txt:'Encrypted anomaly. Unknown origin — completely masked. But there\'s a partial identifier in the header. Three letters, deliberately fragmented. Like whoever sent this wanted to be found — but only by someone really paying attention.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null},
+/* 12 */{sp:'OZ SYSTEM',cls:'system',txt:'[ PARTIAL ID RECOVERED ] ——  A . L . ? ——  [ REMAINING DATA: FRAGMENTED // CIPHER: AES-∞ // RECONSTRUCTION REQUIRED ]',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:'💻 A... L... ?'},
+/* 13 */{sp:'NATSUKI',cls:'natsuki',txt:'A, L — and something else. That\'s not random noise. Someone deliberately split this. They want us to work for it.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null},
+/* 14 */{sp:'KAZUMA',cls:'kazuma',txt:'The cipher structure — I\'ve seen something like this before. In Oz\'s deepest maintenance layers. Whoever sent this didn\'t just use Oz. They\'ve been inside its architecture. Working in it.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:'😯 Deep access'},
+/* 15 */{sp:'KENJI',cls:'kenji',txt:'And they hid something inside it. For someone specific. The packet header has a destination flag — it\'s not addressed to a system. It\'s addressed to a person. A name embedded in the encrypted layer.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'country',emotion:null,
+  choices:[
+    {label:'A — We crack it now',txt:'Kenji: I can pull the four fragments apart and reconstruct the full transmission. Two minutes. Let\'s go.'},
+    {label:'B — Could be a trap',txt:'Kazuma: Could be engineered to bait us into opening it.\nKenji: ...You\'re right. But I\'m also absolutely going to open it.'}
+  ]},
+/* 16 */{sp:'NARRATOR',cls:'narrator',txt:'Kenji spreads the packet header across his screen. Four scrambled fragments — each a piece of a message that someone, somewhere, really wanted to send. His hands find the keyboard.',chars:{kenji:1,kazuma:1},bg:'country',puzzle:true,emotion:null},
+/* 17 — POST PUZZLE */{sp:'KENJI',cls:'kenji',txt:'The fragments resolve. Cipher collapses. The sender identity is—',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:'💡 Decrypted!'},
+/* 18 */{sp:'OZ SYSTEM',cls:'system',txt:'[ DECRYPTION COMPLETE ] ▸ SENDER: A L I ▸ ORIGIN: MASKED // DEEP NODE ▸ TYPE: PERSONAL // BIRTHDAY ▸ RECIPIENT: IASON ▸ MSG: "I built something inside Oz. For my friend. He\'ll never ask for a fuss — so I made one anyway."',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:null},
+/* 19 */{sp:'NATSUKI',cls:'natsuki',txt:'...He built something inside Oz. For his friend. And hid it behind a cipher that took three of us to crack.\n...Who does that?',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:'🌸 That\'s something else'},
+/* 20 */{sp:'KAZUMA',cls:'kazuma',txt:'(quietly impressed) Someone who knows exactly what their friend is worth. And went all the way in to prove it.',chars:{kazuma:1},bg:'oz',emotion:null,
+  choices:[
+    {label:'A — That\'s genuinely legendary',txt:'Kenji: Hiding a birthday gift inside two billion lines of global infrastructure because you wanted to reach one specific person? That\'s the most impressive thing I\'ve ever seen.\nKazuma: ...Yeah.'},
+    {label:'B — Who is Iason?',txt:'Kenji: Ali hid this for someone named Iason. Somewhere in Oz, there\'s a space built for one person — and we just found the door.\nKazuma: Then we find what\'s inside.'},
+    {label:'C — What did Ali build?',txt:'Kenji: Whatever Ali built is still in there. Somewhere in Oz — tagged to this transmission. We need to find it.\nKazuma: Clock\'s ticking. Let\'s move.'}
+  ]},
+/* 21 */{sp:'NATSUKI',cls:'natsuki',txt:'(puts the curry down properly for the first time) Okay. I\'m in. Nobody builds something like this without it meaning something. We find it.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:'💪 Team assembled'},
+/* 22 */{sp:'KAZUMA',cls:'kazuma',txt:'And we find it before whatever else is in that network does.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:null},
+/* 23 */{sp:'NARRATOR',cls:'narrator',txt:'The curry goes cold on the courtyard table. The family shouts from somewhere warm and oblivious. And deep in the Oz network — patient, encrypted, built with care — something waits. Made by Ali. For Iason. Against all odds.',chars:{kenji:1,natsuki:1,kazuma:1},bg:'oz',emotion:'✨ To be continued...'},
+/* 24 */{sp:'END',cls:'',txt:'',chars:{},bg:'oz',emotion:null},
+];
+
+/* ══ PUZZLE — now decrypts to ALI ══ */
+const CORRECT=['ORIGIN: DEEP-NODE','SENDER: ALI','RECIPIENT: IASON','TYPE: BDAY_GIFT'];
+const SCRAMBLED=['RECIPIENT: IASON','SENDER: ALI','TYPE: BDAY_GIFT','ORIGIN: DEEP-NODE'];
+const FTYPES=['ORIGIN TAG','SENDER ID','RECIPIENT TAG','PAYLOAD TYPE'];
+let slots=Array(4).fill(null),dragSrc=null,puzzleDone=false,scene=0,typing=false,tiInt=null;
+const DOTCOLS={narrator:'#a0c8ff',kenji:'#5ee6ff',natsuki:'#ff7aaa',kazuma:'#ff6a30',system:'#a070ff'};
+
+function buildPuzzle(){
+  const se=document.getElementById('pz-slots'),fe=document.getElementById('pz-frags');
+  se.innerHTML='';fe.innerHTML='';
+  CORRECT.forEach((c,i)=>{
+    const s=document.createElement('div');s.className='pz-slot';s.dataset.i=i;
+    s.innerHTML=`<div class="slot-num">SLOT ${i+1}</div><div class="slot-ph">— EMPTY —</div>`;
+    s.addEventListener('dragover',e=>{e.preventDefault();s.classList.add('drag-over');});
+    s.addEventListener('dragleave',()=>s.classList.remove('drag-over'));
+    s.addEventListener('drop',e=>{e.preventDefault();s.classList.remove('drag-over');onDrop(i,s);});
+    se.appendChild(s);
+  });
+  SCRAMBLED.forEach(f=>{
+    const fr=document.createElement('div');fr.className='pz-frag';fr.dataset.v=f;fr.draggable=true;
+    fr.innerHTML=`<div class="frag-type">${FTYPES[CORRECT.indexOf(f)]}</div><div class="frag-val">${f}</div>`;
+    fr.addEventListener('dragstart',()=>{dragSrc=fr;fr.classList.add('dragging');});
+    fr.addEventListener('dragend',()=>fr.classList.remove('dragging'));
+    fe.appendChild(fr);
+  });
+}
+
+function onDrop(idx,slotEl){
+  if(!dragSrc)return;
+  const val=dragSrc.dataset.v;
+  if(slots[idx]!==null){const old=document.querySelector(`.pz-frag[data-v="${slots[idx]}"]`);if(old)old.classList.remove('used');}
+  slots[idx]=val;dragSrc.classList.add('used');dragSrc=null;
+  slotEl.classList.add('filled');slotEl.classList.remove('correct','wrong');
+  slotEl.innerHTML=`<div class="slot-fc"><div class="slot-fl">SLOT ${idx+1}</div><div class="slot-fv">${val}</div></div>`;
+  const filled=slots.filter(v=>v!==null).length;
+  document.getElementById('pz-fill').style.width=(filled/4*100)+'%';
+  document.getElementById('pz-prog').textContent=`${filled} / 4 DECODED`;
+  const btn=document.getElementById('pz-check-btn');
+  const st=document.getElementById('pz-status');
+  if(filled===4){btn.style.display='block';st.textContent='All fragments placed — verify to decrypt.';st.style.color='rgba(94,230,255,.6)';}
+  else{btn.style.display='none';st.textContent=filled>0?`${4-filled} fragment(s) remaining...`:'';st.style.color='rgba(94,230,255,.4)';}
+}
+
+function submitPuzzle(){
+  const sEls=document.querySelectorAll('.pz-slot');let ok=true;
+  slots.forEach((v,i)=>{const el=sEls[i];if(v===CORRECT[i]){el.classList.add('correct');el.classList.remove('wrong');}else{el.classList.add('wrong');ok=false;}});
+  const st=document.getElementById('pz-status');
+  if(ok){
+    st.textContent='✓ SEQUENCE VERIFIED — TRANSMISSION RECONSTRUCTED';st.style.color='#00ff88';
+    setTimeout(()=>{
+      puzzleDone=true;
+      document.getElementById('puzzle-overlay').classList.remove('active');
+      document.getElementById('dbox').style.pointerEvents='all';
+      flashScene();setTimeout(()=>{scene++;renderScene();},500);
+    },900);
+  } else {
+    st.textContent='✗ MISMATCH — REORDER THE FRAGMENTS';st.style.color='#ff4466';
+    slots.forEach((v,i)=>{
+      if(v!==CORRECT[i]){
+        const el=sEls[i];const old=document.querySelector(`.pz-frag[data-v="${slots[i]}"]`);
+        if(old)old.classList.remove('used');slots[i]=null;el.classList.remove('filled','wrong');
+        el.innerHTML=`<div class="slot-num">SLOT ${i+1}</div><div class="slot-ph">— RETRY —</div>`;
+      }
+    });
+    setTimeout(()=>{
+      document.getElementById('pz-check-btn').style.display='none';
+      const f=slots.filter(v=>v!==null).length;
+      document.getElementById('pz-fill').style.width=(f/4*100)+'%';
+      document.getElementById('pz-prog').textContent=`${f} / 4 DECODED`;
+      document.getElementById('pz-status').textContent=f>0?`${4-f} fragment(s) remaining...`:'';
+    },1200);
+  }
+}
+
+function typeText(txt,cb){
+  typing=true;if(tiInt)clearInterval(tiInt);
+  const el=document.getElementById('dlg-text');el.textContent='';let i=0;
+  tiInt=setInterval(()=>{el.textContent+=txt[i]||'';i++;if(i>=txt.length){clearInterval(tiInt);tiInt=null;typing=false;if(cb)cb();}},16);
+}
+function setSpeaker(sp,cls){
+  const n=document.getElementById('spk-name');n.textContent=sp;n.className=cls;
+  const d=document.getElementById('spk-dot');d.style.background=DOTCOLS[cls]||'#a0c8ff';d.style.boxShadow=`0 0 8px ${DOTCOLS[cls]||'#a0c8ff'}`;
+}
+function showEmotion(e){if(!e)return;const b=document.getElementById('emotion-badge');b.textContent=e;b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2600);}
+function flashScene(){const f=document.getElementById('scene-flash');f.style.opacity='.7';setTimeout(()=>f.style.opacity='0',300);}
+function showChoices(arr){
+  const ch=document.getElementById('choices');ch.innerHTML='';
+  arr.forEach((c,i)=>{const btn=document.createElement('button');btn.className='choice-btn';btn.innerHTML=`<div class="choice-label">RESPONSE ${String.fromCharCode(65+i)}</div>${c.label}`;btn.onclick=e=>{e.stopPropagation();selectChoice(c);};ch.appendChild(btn);});
+  ch.classList.add('show');document.getElementById('dlg-hint').style.display='none';document.getElementById('dbox').style.pointerEvents='none';
+}
+function selectChoice(c){
+  document.getElementById('choices').classList.remove('show');document.getElementById('choices').innerHTML='';
+  document.getElementById('dlg-hint').style.display='block';document.getElementById('dbox').style.pointerEvents='all';
+  typeText(c.txt,()=>{});
+  document.getElementById('dbox').onclick=()=>{document.getElementById('dbox').onclick=()=>handleClick();scene++;renderScene();};
+}
+function renderScene(){
+  if(scene>=SCENES.length)return;
+  const s=SCENES[scene];
+  if(s.sp==='END'){document.getElementById('end-card').classList.add('show');return;}
+  document.getElementById('bg-country').style.opacity=s.bg==='oz'?'0':'1';
+  document.getElementById('bg-oz').style.opacity=s.bg==='oz'?'1':'0';
+  ['kenji','natsuki','kazuma'].forEach(c=>{document.getElementById('char-'+c).style.opacity=(s.chars&&s.chars[c])?'1':'0';});
+  setSpeaker(s.sp,s.cls);typeText(s.txt,()=>{if(s.choices)showChoices(s.choices);});showEmotion(s.emotion);
+  if(s.notif){const n=document.getElementById('notif');n.classList.add('show');setTimeout(()=>n.classList.remove('show'),5000);}
+  if(s.puzzle&&!puzzleDone){document.getElementById('dbox').style.pointerEvents='none';setTimeout(()=>{buildPuzzle();document.getElementById('puzzle-overlay').classList.add('active');},1000);}
+}
+function handleClick(){
+  if(document.getElementById('choices').classList.contains('show'))return;
+  if(typing){if(tiInt)clearInterval(tiInt);tiInt=null;typing=false;document.getElementById('dlg-text').textContent=SCENES[scene].txt;if(SCENES[scene].choices)showChoices(SCENES[scene].choices);return;}
+  if(scene>=SCENES.length-1)return;
+  scene++;renderScene();
+}
+function startGame(){
+  document.getElementById('chapter-title').style.opacity='0';
+  setTimeout(()=>{document.getElementById('chapter-title').style.display='none';document.getElementById('dbox').style.display='block';renderScene();},1000);
+}
+document.getElementById('dbox').onclick=handleClick;
+</script>
+</body>
+</html>

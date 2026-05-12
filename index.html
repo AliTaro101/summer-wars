@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Wars: The Birthday Protocol</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{width:100%;height:100%;background:#000;overflow:hidden;font-family:'Noto Sans JP',sans-serif;}
+#app{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;position:relative;}
+
+/* ═══ MAIN MENU ═══ */
+#menu{width:920px;height:580px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 80px rgba(94,230,255,0.3),0 0 160px rgba(94,230,255,0.1);}
+#menu-canvas{position:absolute;inset:0;}
+#menu-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;}
+
+/* Logo */
+.m-pre{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.4);letter-spacing:8px;margin-bottom:8px;}
+.m-title{font-family:'Orbitron',sans-serif;font-size:38px;font-weight:900;background:linear-gradient(135deg,#5ee6ff,#a070ff,#5ee6ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;text-align:center;line-height:1.1;animation:titleShimmer 4s ease-in-out infinite;}
+@keyframes titleShimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+.m-subtitle{font-family:'Share Tech Mono',monospace;font-size:13px;color:rgba(160,200,255,.5);letter-spacing:5px;margin-top:6px;margin-bottom:6px;}
+.m-line{width:300px;height:1px;background:linear-gradient(90deg,transparent,rgba(94,230,255,.5),rgba(160,112,255,.5),transparent);margin:16px auto;}
+.m-for{font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(255,200,80,.5);letter-spacing:4px;margin-bottom:32px;}
+
+/* Chapter buttons */
+.ch-buttons{display:flex;flex-direction:column;gap:12px;width:480px;}
+.ch-btn{display:flex;align-items:center;gap:16px;padding:14px 22px;background:linear-gradient(135deg,rgba(0,20,60,.85),rgba(0,40,80,.8));border:1px solid rgba(94,230,255,.25);border-radius:5px;cursor:pointer;transition:all .3s;position:relative;overflow:hidden;text-align:left;}
+.ch-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#5ee6ff,#a070ff);opacity:0;transition:opacity .2s;}
+.ch-btn:hover{border-color:rgba(94,230,255,.6);transform:translateX(6px);background:linear-gradient(135deg,rgba(0,40,100,.9),rgba(0,60,120,.85));box-shadow:0 0 20px rgba(94,230,255,.1);}
+.ch-btn:hover::before{opacity:1;}
+.ch-btn.locked{opacity:.4;cursor:not-allowed;pointer-events:none;}
+.ch-num-badge{width:44px;height:44px;border-radius:4px;border:1px solid rgba(94,230,255,.3);display:flex;align-items:center;justify-content:center;font-family:'Orbitron',sans-serif;font-size:16px;font-weight:900;color:#5ee6ff;flex-shrink:0;text-shadow:0 0 10px rgba(94,230,255,.5);}
+.ch-info{flex:1;}
+.ch-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.4);letter-spacing:3px;margin-bottom:3px;}
+.ch-name{font-family:'Noto Sans JP',sans-serif;font-size:14px;font-weight:700;color:#e8f4ff;margin-bottom:2px;}
+.ch-desc{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(160,190,255,.4);letter-spacing:1px;}
+.ch-arrow{font-family:'Orbitron',sans-serif;font-size:14px;color:rgba(94,230,255,.4);transition:transform .3s;}
+.ch-btn:hover .ch-arrow{transform:translateX(4px);color:#5ee6ff;}
+
+/* Bottom credits */
+.m-credits{position:absolute;bottom:18px;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(94,230,255,.2);letter-spacing:3px;text-align:center;}
+
+/* ═══ CHAPTER FRAME ═══ */
+#chapter-frame{position:fixed;inset:0;z-index:50;display:none;flex-direction:column;}
+#frame-topbar{height:36px;background:rgba(1,4,18,.98);border-bottom:1px solid rgba(94,230,255,.15);display:flex;align-items:center;padding:0 16px;gap:16px;flex-shrink:0;}
+#back-btn{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.5);letter-spacing:2px;cursor:pointer;padding:5px 12px;border:1px solid rgba(94,230,255,.2);border-radius:2px;transition:all .3s;background:transparent;}
+#back-btn:hover{color:#5ee6ff;border-color:rgba(94,230,255,.5);background:rgba(94,230,255,.05);}
+#frame-title{font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(160,200,255,.4);letter-spacing:3px;}
+#frame-hint{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(94,230,255,.25);margin-left:auto;letter-spacing:1px;}
+#chapter-iframe{flex:1;border:none;width:100%;display:block;}
+
+/* Loading screen */
+#loading{position:fixed;inset:0;z-index:60;background:#000;display:none;flex-direction:column;align-items:center;justify-content:center;gap:16px;}
+.loading-title{font-family:'Orbitron',sans-serif;font-size:13px;color:#5ee6ff;letter-spacing:4px;}
+.loading-bar-wrap{width:300px;height:4px;background:rgba(94,230,255,.1);border-radius:2px;overflow:hidden;border:1px solid rgba(94,230,255,.2);}
+.loading-bar-fill{height:100%;background:linear-gradient(90deg,#5ee6ff,#a070ff);border-radius:2px;animation:loadFill 1.2s ease-in-out infinite;}
+@keyframes loadFill{0%{width:0%}50%{width:80%}100%{width:100%}}
+.loading-sub{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(94,230,255,.4);letter-spacing:2px;}
+</style>
+</head>
+<body>
+<div id="app">
+
+  <!-- MAIN MENU -->
+  <div id="menu">
+    <canvas id="menu-canvas" width="920" height="580"></canvas>
+    <div id="menu-content">
+      <div class="m-pre">A NON-COMMERCIAL BIRTHDAY FAN PROJECT</div>
+      <div class="m-title">SUMMER WARS</div>
+      <div class="m-subtitle">THE BIRTHDAY PROTOCOL</div>
+      <div class="m-line"></div>
+      <div class="m-for">🎉 &nbsp; FOR IASON &nbsp; · &nbsp; FROM ALI &nbsp; 🎉</div>
+
+      <div class="ch-buttons">
+        <div class="ch-btn" onclick="openChapter(1)">
+          <div class="ch-num-badge">01</div>
+          <div class="ch-info">
+            <div class="ch-label">CHAPTER ONE</div>
+            <div class="ch-name">Summer Reunion</div>
+            <div class="ch-desc">A strange encrypted packet arrives in Oz — and someone named Iason is at its origin.</div>
+          </div>
+          <div class="ch-arrow">▶</div>
+        </div>
+        <div class="ch-btn" onclick="openChapter(2)">
+          <div class="ch-num-badge" style="color:#ff6a30;text-shadow:0 0 10px rgba(255,106,48,.5);">02</div>
+          <div class="ch-info">
+            <div class="ch-label" style="color:rgba(255,106,48,.4);">CHAPTER TWO</div>
+            <div class="ch-name">Digital Distortion</div>
+            <div class="ch-desc">Oz begins glitching. King Kazma goes in. Something old wakes up in the deep network.</div>
+          </div>
+          <div class="ch-arrow" style="color:rgba(255,106,48,.4);">▶</div>
+        </div>
+        <div class="ch-btn" onclick="openChapter(3)">
+          <div class="ch-num-badge" style="color:#44ffaa;text-shadow:0 0 10px rgba(68,255,170,.5);">03</div>
+          <div class="ch-info">
+            <div class="ch-label" style="color:rgba(68,255,170,.4);">CHAPTER THREE</div>
+            <div class="ch-name">Midnight in Oz</div>
+            <div class="ch-desc">The final sprint. Run, Iason. The event space is waiting — and so is a message from Ali.</div>
+          </div>
+          <div class="ch-arrow" style="color:rgba(68,255,170,.4);">▶</div>
+        </div>
+      </div>
+    </div>
+    <div class="m-credits">SUMMER WARS © MAMORU HOSODA / MADHOUSE · FAN PROJECT · NON-COMMERCIAL · MADE BY ALI FOR IASON 🎉</div>
+  </div>
+
+  <!-- LOADING -->
+  <div id="loading">
+    <div class="loading-title">CONNECTING TO OZ</div>
+    <div class="loading-bar-wrap"><div class="loading-bar-fill"></div></div>
+    <div class="loading-sub" id="loading-sub">Loading chapter...</div>
+  </div>
+
+</div>
+
+<script>
+/* ── MENU CANVAS ANIMATION ── */
+const MC=document.getElementById('menu-canvas');
+const MX=MC.getContext('2d');
+const W=920,H=580;
+let stars=[],streams=[],fworks=[],mT=0;
+
+// Stars
+for(let i=0;i<120;i++)stars.push({x:Math.random()*W,y:Math.random()*H,r:Math.random()*1.5+.3,phase:Math.random()*Math.PI*2,speed:1+Math.random()*3});
+
+// Data streams
+const JP='アイウエオカキクケコサシスセソタチツテトナニヌネノ0123456789ABCDEF∞∑∆Ω';
+function spawnStream(){streams.push({x:Math.random()*W,y:-20,chars:[...Array(8)].map(()=>JP[Math.floor(Math.random()*JP.length)]),speed:0.6+Math.random()*0.8,alpha:0.12+Math.random()*0.1,col:Math.random()>.5?'94,230,255':'160,112,255'});}
+for(let i=0;i<15;i++)spawnStream();
+
+// Subtle fireworks on menu
+function spawnMenuFW(){
+  const x=80+Math.random()*760,y=30+Math.random()*200;
+  const cols=['rgba(94,230,255,','rgba(160,112,255,','rgba(255,200,80,','rgba(68,255,170,'];
+  const col=cols[Math.floor(Math.random()*cols.length)];
+  const ps=[];for(let i=0;i<25;i++){const a=Math.random()*Math.PI*2,spd=0.5+Math.random()*2.5;ps.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,col});}
+  fworks.push({ps});
+}
+
+function menuLoop(){
+  requestAnimationFrame(menuLoop);mT+=0.012;
+  MX.clearRect(0,0,W,H);
+  // BG
+  const bg=MX.createRadialGradient(W/2,H/2,0,W/2,H/2,600);
+  bg.addColorStop(0,'#050a20');bg.addColorStop(.6,'#020810');bg.addColorStop(1,'#010508');
+  MX.fillStyle=bg;MX.fillRect(0,0,W,H);
+  // Perspective grid
+  MX.strokeStyle='rgba(94,230,255,0.05)';MX.lineWidth=1;
+  for(let i=0;i<14;i++){const x=(-W/2)+(i/13)*W*2;MX.beginPath();MX.moveTo(W/2,H*0.55);MX.lineTo(x,0);MX.stroke();}
+  for(let d=0;d<5;d++){const prog=(d/5+mT*0.08)%1;const y=H*0.55-(1-prog)*H*0.55;MX.strokeStyle=`rgba(94,230,255,${prog*0.06})`;MX.beginPath();MX.moveTo(0,y);MX.lineTo(W,y);MX.stroke();}
+  // Stars
+  stars.forEach(s=>{const twinkle=0.3+Math.sin(mT*s.speed+s.phase)*0.4;MX.fillStyle=`rgba(255,255,255,${twinkle})`;MX.beginPath();MX.arc(s.x,s.y,s.r,0,Math.PI*2);MX.fill();});
+  // Nebula glows
+  [[120,100,200,150,'rgba(80,0,180,0.06)'],[680,80,180,130,'rgba(0,80,200,0.05)'],[460,300,160,120,'rgba(68,255,170,0.03)']].forEach(([x,y,rw,rh,col])=>{
+    MX.save();MX.scale(1,rh/rw);const nb=MX.createRadialGradient(x,y*rw/rh,0,x,y*rw/rh,rw);nb.addColorStop(0,col);nb.addColorStop(1,'transparent');MX.fillStyle=nb;MX.beginPath();MX.arc(x,y*rw/rh,rw,0,Math.PI*2);MX.fill();MX.restore();
+  });
+  // Data streams
+  streams.forEach(s=>{
+    s.y+=s.speed;
+    s.chars.forEach((c,i)=>{MX.fillStyle=`rgba(${s.col},${s.alpha*(1-i/8)})`;MX.font='9px Share Tech Mono';MX.textAlign='left';MX.fillText(c,s.x,s.y+i*10);});
+    if(s.y>H+100){s.y=-80;s.x=Math.random()*W;s.chars=[...Array(8)].map(()=>JP[Math.floor(Math.random()*JP.length)]);}
+  });
+  // Subtle fireworks
+  if(Math.random()<0.008)spawnMenuFW();
+  fworks.forEach(fw=>{fw.ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.04;p.vx*=0.98;p.life-=0.018;MX.globalAlpha=Math.max(0,p.life*0.6);MX.fillStyle=p.col+'0.8)';MX.beginPath();MX.arc(p.x,p.y,1.5,0,Math.PI*2);MX.fill();});fw.ps=fw.ps.filter(p=>p.life>0);});
+  fworks=fworks.filter(fw=>fw.ps.length>0);MX.globalAlpha=1;
+  // Scanline overlay
+  MX.fillStyle='rgba(0,0,0,0.03)';
+  for(let y=0;y<H;y+=4){MX.fillRect(0,y,W,1);}
+}
+menuLoop();
+
+/* ── CHAPTER URLS ── */
+// Chapter URLs — update these with your Netlify links
+const CHAPTER_URLS={
+  1:'summer_wars_ch1.html',
+  2:'summer_wars_ch2.html',
+  3:'summer_wars_ch3.html',
+};
+
+const CHAPTERS={
+  1:{title:'Chapter 1 — Summer Reunion',sub:'Loading Oz network...',color:'#5ee6ff'},
+  2:{title:'Chapter 2 — Digital Distortion',sub:'Connecting to deep layer...',color:'#ff6a30'},
+  3:{title:'Chapter 3 — Midnight in Oz',sub:'Initiating final sprint...',color:'#44ffaa'},
+};
+
+function openChapter(n){
+  const ch=CHAPTERS[n];
+  const ld=document.getElementById('loading');
+  ld.style.display='flex';
+  document.getElementById('loading-sub').textContent=ch.sub;
+  document.querySelector('.loading-title').style.color=ch.color;
+  setTimeout(()=>{ window.location.href=CHAPTER_URLS[n]; },1400);
+}
+
+function goBack(){
+  document.getElementById('chapter-frame').style.display='none';
+  document.getElementById('chapter-iframe').srcdoc='';
+}
+
+function buildBridgePage(n,ch){
+  const descriptions={
+    1:"Kenji arrives late to the Jinnouchi summer gathering — and finds something strange waiting in his Oz inbox. A packet with no sender. A cipher that shouldn't exist. And three letters: I. A. S.",
+    2:"Oz starts glitching from the inside. King Kazma goes in to trace Iason's hidden nodes — and finds something that should have stayed dead.",
+    3:"The final sprint. Iason's avatar runs the northern corridor as the clock counts down to midnight. At the end of the path: the event space, a message, and the truth about why all of this was built."
+  };
+  const colors={1:'#5ee6ff',2:'#ff6a30',3:'#44ffaa'};
+  const col=colors[n];
+  return `<!DOCTYPE html><html><head><meta charset="UTF-8">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap');
+    *{margin:0;padding:0;box-sizing:border-box;}
+    body{background:#010a18;display:flex;align-items:center;justify-content:center;height:100vh;font-family:'Share Tech Mono',monospace;}
+    .wrap{text-align:center;max-width:560px;padding:40px;}
+    .ch-num{font-family:'Orbitron',sans-serif;font-size:64px;font-weight:900;color:transparent;-webkit-text-stroke:1px ${col}44;line-height:1;margin-bottom:8px;}
+    .ch-label{font-family:'Orbitron',sans-serif;font-size:9px;color:${col}88;letter-spacing:6px;margin-bottom:8px;}
+    .ch-title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;color:#fff;letter-spacing:3px;margin-bottom:20px;}
+    .line{width:200px;height:1px;background:linear-gradient(90deg,transparent,${col}66,transparent);margin:0 auto 20px;}
+    .desc{font-size:13px;color:rgba(200,220,255,.55);line-height:1.9;margin-bottom:32px;letter-spacing:1px;}
+    .instruction{background:rgba(0,20,50,.6);border:1px solid ${col}33;border-radius:6px;padding:20px 24px;margin-bottom:24px;text-align:left;}
+    .instruction p{font-size:11px;color:rgba(160,200,255,.6);line-height:2.2;letter-spacing:1px;}
+    .instruction span{color:${col};font-weight:700;}
+    .note{font-size:10px;color:rgba(94,230,255,.3);letter-spacing:2px;line-height:1.8;}
+  </style></head><body>
+  <div class="wrap">
+    <div class="ch-num">0${n}</div>
+    <div class="ch-label">CHAPTER ${['ONE','TWO','THREE'][n-1]}</div>
+    <div class="ch-title">${ch.title.split('—')[1].trim()}</div>
+    <div class="line"></div>
+    <div class="desc">${descriptions[n]}</div>
+    <div class="instruction">
+      <p>📋 <span>HOW TO PLAY THIS CHAPTER:</span></p>
+      <p>1. Go back to the <span>Claude conversation</span> where Ali shared this game</p>
+      <p>2. Find the artifact titled <span>"Chapter ${n}"</span> in the chat</p>
+      <p>3. Click it to open — then click <span>▶ BEGIN</span> to start</p>
+      <p>4. Come back here when you're done to continue to the next chapter</p>
+    </div>
+    <div class="note">Each chapter is a separate playable artifact in the conversation.<br>Play them in order for the full story experience.<br><br>🎉 This game was made for you by Ali. Happy Birthday, Iason.</div>
+  </div></body></html>`;
+}
+</script>
+</body>
+</html>

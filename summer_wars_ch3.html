@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Wars: The Birthday Protocol — Chapter 3</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;font-family:'Noto Sans JP',sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+#game{width:920px;height:580px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 80px rgba(68,255,170,0.25),0 0 160px rgba(68,255,170,0.1);}
+
+/* ═══ OZ BG ═══ */
+#bg-oz{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#081430 0%,#030a1a 50%,#010508 100%);}
+.oz-grid-far{position:absolute;bottom:0;left:0;right:0;height:340px;background-image:linear-gradient(rgba(68,255,170,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(68,255,170,.12) 1px,transparent 1px);background-size:60px 60px;transform:perspective(500px) rotateX(62deg);transform-origin:bottom center;animation:gridScroll 5s linear infinite;}
+@keyframes gridScroll{from{background-position:0 0}to{background-position:0 60px}}
+.oz-grid-top{position:absolute;top:0;left:0;right:0;height:260px;background-image:linear-gradient(rgba(68,255,170,.05) 1px,transparent 1px),linear-gradient(90deg,rgba(68,255,170,.05) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 8s linear infinite;}
+@keyframes gridMove{from{background-position:0 0}to{background-position:0 40px}}
+.oz-nebula{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;}
+.neb1{width:320px;height:220px;top:30px;left:60px;background:rgba(68,255,170,.08);animation:nebP 7s ease-in-out infinite;}
+.neb2{width:280px;height:200px;top:50px;right:40px;background:rgba(0,100,255,.1);animation:nebP 5s ease-in-out infinite reverse;}
+.neb3{width:200px;height:160px;bottom:100px;left:320px;background:rgba(160,112,255,.07);animation:nebP 6s ease-in-out infinite 2s;}
+@keyframes nebP{0%,100%{opacity:.8}50%{opacity:.3}}
+.oz-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 35%,rgba(0,5,20,.75) 100%);}
+.oz-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.07) 3px,rgba(0,0,0,.07) 4px);pointer-events:none;}
+#stars-c{position:absolute;inset:0;pointer-events:none;}
+.data-stream{position:absolute;font-family:'Share Tech Mono',monospace;font-size:8px;pointer-events:none;animation:streamFall linear infinite;}
+@keyframes streamFall{from{transform:translateY(-20px);opacity:.35}to{transform:translateY(610px);opacity:0}}
+
+/* ═══ CHARACTERS ═══ */
+.character{position:absolute;bottom:195px;transition:opacity .7s ease;}
+#char-kenji{left:310px;}
+#char-natsuki{left:455px;}
+#char-kazuma{left:185px;}
+
+/* ═══ DIALOGUE ═══ */
+#dbox{position:absolute;bottom:0;left:0;right:0;height:175px;cursor:pointer;user-select:none;z-index:10;display:none;}
+.dbox-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,30,.9),rgba(1,4,18,.97));border-top:1px solid rgba(68,255,170,.2);}
+.dbox-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#44ffaa,#5ee6ff,#44ffaa,transparent);}
+.dbox-inner{position:absolute;inset:0;padding:14px 26px;}
+#spk-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+#spk-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;padding:4px 14px;border-radius:2px;}
+#spk-name.narrator{color:#a0c8ff;border:1px solid rgba(160,200,255,.3);background:rgba(160,200,255,.06);}
+#spk-name.kenji{color:#5ee6ff;border:1px solid rgba(94,230,255,.4);background:rgba(94,230,255,.08);}
+#spk-name.natsuki{color:#ff7aaa;border:1px solid rgba(255,122,170,.4);background:rgba(255,122,170,.08);}
+#spk-name.kazuma{color:#ff6a30;border:1px solid rgba(255,106,48,.4);background:rgba(255,106,48,.08);}
+#spk-name.iason{color:#44ffaa;border:1px solid rgba(68,255,170,.5);background:rgba(68,255,170,.08);text-shadow:0 0 12px rgba(68,255,170,.5);}
+#spk-name.ali{color:#ffcc00;border:1px solid rgba(255,200,0,.5);background:rgba(255,200,0,.08);text-shadow:0 0 12px rgba(255,200,0,.4);}
+#spk-name.system{color:#a070ff;border:1px solid rgba(160,112,255,.4);background:rgba(160,112,255,.08);}
+.spk-dot{width:6px;height:6px;border-radius:50%;animation:sDot 1.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes sDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+#dlg-text{font-size:14px;line-height:1.85;color:#d8e8ff;min-height:52px;}
+#dlg-hint{position:absolute;bottom:14px;right:26px;font-size:9px;color:rgba(150,180,255,.4);font-family:'Orbitron',sans-serif;letter-spacing:2px;animation:hBlink 1.4s ease-in-out infinite;}
+@keyframes hBlink{0%,100%{opacity:.4}50%{opacity:.9}}
+#choices{position:absolute;bottom:180px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 60px;opacity:0;pointer-events:none;transition:opacity .4s;z-index:11;}
+#choices.show{opacity:1;pointer-events:all;}
+.choice-btn{width:100%;max-width:680px;padding:11px 22px;background:linear-gradient(135deg,rgba(0,30,50,.9),rgba(0,50,40,.85));border:1px solid rgba(68,255,170,.25);border-radius:4px;color:#c8ffe8;font-family:'Noto Sans JP',sans-serif;font-size:13px;text-align:left;cursor:pointer;transition:all .25s;position:relative;}
+.choice-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#44ffaa,#5ee6ff);opacity:0;transition:opacity .2s;}
+.choice-btn:hover{border-color:rgba(68,255,170,.6);transform:translateX(4px);}
+.choice-btn:hover::before{opacity:1;}
+.choice-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(68,255,170,.4);letter-spacing:3px;margin-bottom:3px;}
+
+/* EMOTION */
+#emotion-badge{position:absolute;top:18px;left:50%;transform:translateX(-50%) translateY(-60px);background:linear-gradient(135deg,rgba(5,20,40,.95),rgba(2,10,20,.98));border:1px solid rgba(255,200,80,.3);border-radius:30px;padding:7px 20px;font-size:12px;color:#ffe080;transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:25;white-space:nowrap;}
+#emotion-badge.show{transform:translateX(-50%) translateY(0);}
+
+/* ═══ RUNNER ═══ */
+#runner-overlay{position:absolute;inset:0;z-index:20;opacity:0;pointer-events:none;transition:opacity .7s;}
+#runner-overlay.active{opacity:1;pointer-events:all;}
+#runner-canvas{position:absolute;inset:0;}
+#runner-hud{position:absolute;top:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 24px;z-index:3;pointer-events:none;}
+.r-hud-label{font-family:'Orbitron',sans-serif;font-size:7px;color:rgba(68,255,170,.4);letter-spacing:3px;margin-bottom:2px;}
+.r-hud-val{font-family:'Orbitron',sans-serif;font-size:16px;font-weight:700;color:#44ffaa;text-shadow:0 0 8px rgba(68,255,170,.5);}
+#runner-bar-wrap{position:absolute;top:46px;left:24px;right:24px;z-index:3;pointer-events:none;}
+.r-bar-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:3px;}
+.r-bar-label{font-family:'Orbitron',sans-serif;font-size:7px;color:rgba(68,255,170,.35);letter-spacing:2px;}
+#runner-bar{width:100%;height:6px;background:rgba(68,255,170,.08);border-radius:3px;overflow:hidden;border:1px solid rgba(68,255,170,.15);}
+#runner-bar-fill{height:100%;background:linear-gradient(90deg,#44ffaa,#5ee6ff,#a070ff);border-radius:3px;width:0%;transition:width .1s linear;}
+
+/* Start screen */
+#runner-start{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);text-align:center;z-index:4;display:none;}
+#runner-start h3{font-family:'Orbitron',sans-serif;font-size:14px;color:#44ffaa;letter-spacing:4px;margin-bottom:8px;text-shadow:0 0 15px rgba(68,255,170,.6);}
+#runner-start p{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(68,255,170,.5);letter-spacing:2px;margin-bottom:16px;}
+.how-to{background:rgba(0,20,10,.85);border:1px solid rgba(68,255,170,.2);border-radius:6px;padding:12px 24px;margin-bottom:16px;text-align:left;}
+.how-to p{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(160,255,200,.6);line-height:2.2;letter-spacing:1px;}
+.how-to span{color:#44ffaa;}
+.start-run-btn{padding:12px 40px;background:rgba(68,255,170,.08);border:1px solid rgba(68,255,170,.5);color:#44ffaa;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:4px;cursor:pointer;border-radius:3px;transition:all .3s;}
+.start-run-btn:hover{background:rgba(68,255,170,.15);box-shadow:0 0 20px rgba(68,255,170,.2);}
+
+/* Game over */
+#runner-result{position:absolute;inset:0;background:rgba(1,5,18,.92);display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:5;opacity:0;pointer-events:none;transition:opacity .6s;}
+#runner-result.show{opacity:1;pointer-events:all;}
+.rr-title{font-family:'Orbitron',sans-serif;font-size:13px;color:rgba(255,80,80,.7);letter-spacing:4px;margin-bottom:6px;}
+.rr-score{font-family:'Orbitron',sans-serif;font-size:34px;font-weight:900;color:#5ee6ff;text-shadow:0 0 20px rgba(94,230,255,.5);}
+.rr-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(160,200,255,.4);margin-top:6px;letter-spacing:2px;}
+.rr-hint{font-size:11px;color:rgba(68,255,170,.4);font-family:'Share Tech Mono',monospace;margin-top:4px;}
+.rr-retry{margin-top:20px;padding:11px 36px;background:transparent;border:1px solid rgba(94,230,255,.4);color:#5ee6ff;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:4px;cursor:pointer;border-radius:3px;transition:all .3s;}
+.rr-retry:hover{background:rgba(94,230,255,.08);}
+
+/* ═══ EVENT SPACE ═══ */
+#event-overlay{position:absolute;inset:0;z-index:30;opacity:0;pointer-events:none;transition:opacity 1.5s;}
+#event-overlay.show{opacity:1;pointer-events:all;}
+#event-canvas{position:absolute;inset:0;}
+#event-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;}
+.ev-eyebrow{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(68,255,170,.5);letter-spacing:6px;margin-bottom:8px;}
+.ev-title{font-family:'Orbitron',sans-serif;font-size:24px;font-weight:900;background:linear-gradient(135deg,#44ffaa,#5ee6ff,#a070ff,#ffcc00);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px;text-align:center;margin-bottom:4px;animation:shimmer 3s ease-in-out infinite;}
+@keyframes shimmer{0%,100%{filter:brightness(1)}50%{filter:brightness(1.4)}}
+.ev-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(160,220,255,.45);letter-spacing:3px;margin-bottom:22px;}
+.ev-chars{display:flex;gap:20px;align-items:flex-end;margin-bottom:18px;}
+.ev-char-wrap{display:flex;flex-direction:column;align-items:center;gap:5px;animation:evFloat 3s ease-in-out infinite;}
+@keyframes evFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.ev-char-name{font-family:'Orbitron',sans-serif;font-size:7px;color:rgba(255,255,255,.35);letter-spacing:2px;}
+.ev-continue{font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(68,255,170,.5);letter-spacing:4px;cursor:pointer;animation:hBlink 1.4s ease-in-out infinite;margin-top:4px;}
+
+/* ═══ ALI'S MESSAGE ═══ */
+#ali-overlay{position:absolute;inset:0;z-index:40;opacity:0;pointer-events:none;transition:opacity 1.5s;}
+#ali-overlay.show{opacity:1;pointer-events:all;}
+.ali-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#1a1400,#080600);}
+.ali-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(255,200,0,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,200,0,.04) 1px,transparent 1px);background-size:35px 35px;}
+.ali-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 40%,rgba(8,6,0,.95) 100%);}
+#ali-content{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:2;padding:0 70px;}
+.ali-from{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(255,200,0,.4);letter-spacing:6px;margin-bottom:16px;}
+.ali-line{width:260px;height:1px;background:linear-gradient(90deg,transparent,rgba(255,200,0,.4),transparent);margin:0 auto 20px;}
+.ali-sig-wrap{margin-bottom:18px;position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;}
+.ali-aura{position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(255,200,0,.1),transparent 70%);animation:auraPulse 2.5s ease-in-out infinite;}
+@keyframes auraPulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.15);opacity:1}}
+.ali-name-badge{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;color:#ffcc00;letter-spacing:6px;text-shadow:0 0 20px rgba(255,200,0,.5);}
+.ali-tag{font-family:'Share Tech Mono',monospace;font-size:10px;color:rgba(255,200,0,.4);letter-spacing:4px;}
+#ali-msg{font-size:13.5px;line-height:2;color:#fff8e0;text-align:center;max-width:700px;min-height:80px;}
+.ali-sig{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,200,0,.5);letter-spacing:3px;margin-top:16px;}
+#ali-continue{font-family:'Orbitron',sans-serif;font-size:10px;color:rgba(255,200,0,.4);letter-spacing:4px;cursor:pointer;animation:hBlink 1.4s ease-in-out infinite;margin-top:12px;}
+
+/* ═══ FINAL CARD ═══ */
+#final-card{position:absolute;inset:0;z-index:50;opacity:0;pointer-events:none;transition:opacity 2s;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#051a10,#010a05);}
+#final-card.show{opacity:1;pointer-events:all;}
+#fc-canvas{position:absolute;inset:0;}
+.fc-content{position:relative;z-index:2;display:flex;flex-direction:column;align-items:center;text-align:center;}
+.fc-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(68,255,170,.4);letter-spacing:6px;margin-bottom:10px;}
+.fc-line{width:200px;height:1px;background:linear-gradient(90deg,transparent,rgba(68,255,170,.5),transparent);margin:0 auto 18px;}
+.fc-from{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(255,200,0,.5);letter-spacing:4px;margin-bottom:6px;}
+.fc-bday{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;background:linear-gradient(135deg,#44ffaa,#ffcc00,#ff9a5c,#5ee6ff,#a070ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;}
+.fc-name{font-size:52px;color:#fff;font-weight:900;text-shadow:0 0 40px rgba(255,255,255,.5),0 0 80px rgba(68,255,170,.3);margin:8px 0;letter-spacing:6px;animation:namePulse 3s ease-in-out infinite;}
+@keyframes namePulse{0%,100%{text-shadow:0 0 40px rgba(255,255,255,.5),0 0 80px rgba(68,255,170,.3)}50%{text-shadow:0 0 60px rgba(255,255,255,.9),0 0 120px rgba(68,255,170,.5),0 0 160px rgba(255,200,0,.2)}}
+.fc-emoji{font-size:32px;margin:6px 0;}
+.fc-text{color:rgba(200,230,220,.6);font-size:12.5px;line-height:1.9;max-width:520px;margin:12px 0;}
+.fc-credits{font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(68,255,170,.2);letter-spacing:3px;margin-top:12px;line-height:2;}
+
+/* ═══ CHAPTER TITLE ═══ */
+#chapter-title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:radial-gradient(ellipse at 50% 50%,#051a10,#010508);}
+#title-stars{position:absolute;inset:0;}
+.t-line{width:200px;height:1px;background:linear-gradient(90deg,transparent,rgba(68,255,170,.6),transparent);margin:14px auto;}
+.pre-title{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(68,255,170,.4);letter-spacing:8px;margin-bottom:5px;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;background:linear-gradient(135deg,#44ffaa,#5ee6ff,#a070ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;}
+.game-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(68,255,170,.3);letter-spacing:4px;margin-bottom:26px;}
+.ch-num{font-family:'Orbitron',sans-serif;font-size:52px;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(68,255,170,.3);line-height:1;}
+.ch-title{font-size:26px;font-weight:700;color:#fff;letter-spacing:4px;}
+.ch-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(180,255,220,.3);letter-spacing:3px;margin-top:5px;}
+.start-btn{margin-top:38px;padding:12px 46px;background:transparent;border:1px solid rgba(68,255,170,.5);color:#44ffaa;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:5px;cursor:pointer;transition:all .3s;position:relative;z-index:101;}
+.start-btn:hover{background:rgba(68,255,170,.08);box-shadow:0 0 25px rgba(68,255,170,.2);}
+
+#scene-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:55;transition:opacity .25s;}
+</style>
+</head>
+<body>
+<div id="game">
+
+<!-- OZ BG -->
+<div id="bg-oz">
+  <div class="oz-nebula neb1"></div><div class="oz-nebula neb2"></div><div class="oz-nebula neb3"></div>
+  <div class="oz-grid-far"></div><div class="oz-grid-top"></div>
+  <div id="stars-c"></div>
+  <div id="streams-c"></div>
+  <div class="oz-vignette"></div><div class="oz-scanline"></div>
+</div>
+
+<!-- CHARACTERS -->
+<div class="character" id="char-kenji" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none"><ellipse cx="44" cy="170" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/><rect x="22" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><rect x="46" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><ellipse cx="31" cy="170" rx="12" ry="6" fill="#1a1a2a"/><ellipse cx="55" cy="170" rx="12" ry="6" fill="#1a1a2a"/><rect x="16" y="56" width="56" height="68" rx="6" fill="#3a6ab8"/><path d="M36 56 L44 70 L52 56" fill="#fff" opacity="0.9"/><rect x="4" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><rect x="70" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><ellipse cx="11" cy="110" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="77" cy="110" rx="8" ry="7" fill="#f5c9a0"/><rect x="18" y="96" width="52" height="30" rx="3" fill="#181828"/><rect x="21" y="99" width="46" height="24" rx="2" fill="#1a3a6a"/><rect x="23" y="101" width="42" height="20" rx="1" fill="#0d2448"/><rect x="36" y="46" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="27" ry="28" fill="#f5c9a0"/><path d="M17 28 C17 10 28 4 44 4 C60 4 71 10 71 28 Z" fill="#1a1a2e"/><rect x="23" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><rect x="47" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><line x1="41" y1="34" x2="47" y2="34" stroke="#2a2a3a" stroke-width="2"/><circle cx="32" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="56" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="33" cy="34" r="1" fill="white"/><circle cx="57" cy="34" r="1" fill="white"/><path d="M38 44 Q44 48 50 44" stroke="#c4845a" stroke-width="1.5" fill="none"/></svg>
+</div>
+<div class="character" id="char-natsuki" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none"><ellipse cx="44" cy="170" rx="26" ry="5" fill="rgba(0,0,0,0.2)"/><rect x="24" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/><rect x="50" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/><ellipse cx="31" cy="168" rx="11" ry="5" fill="#c83060"/><ellipse cx="57" cy="168" rx="11" ry="5" fill="#c83060"/><path d="M14 108 Q20 148 44 148 Q68 148 74 108 Z" fill="#c83060"/><rect x="20" y="58" width="48" height="52" rx="6" fill="#e8407a"/><rect x="6" y="62" width="16" height="44" rx="6" fill="#e8407a"/><rect x="66" y="62" width="16" height="44" rx="6" fill="#e8407a"/><ellipse cx="14" cy="108" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="74" cy="108" rx="8" ry="7" fill="#f5c9a0"/><rect x="36" y="48" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="26" ry="27" fill="#f5c9a0"/><ellipse cx="44" cy="28" rx="28" ry="26" fill="#c8602a"/><path d="M16 28 C16 8 28 2 44 2 C60 2 72 8 72 28" fill="#e07030"/><ellipse cx="18" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="70" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="33" cy="35" rx="5" ry="6" fill="#3a1060"/><ellipse cx="55" cy="35" rx="5" ry="6" fill="#3a1060"/><circle cx="36" cy="31" r="2" fill="white"/><circle cx="58" cy="31" r="2" fill="white"/><path d="M37 44 Q44 50 51 44" stroke="#c4645a" stroke-width="2" fill="none"/></svg>
+</div>
+<div class="character" id="char-kazuma" style="opacity:0;">
+<svg width="80" height="165" viewBox="0 0 80 165" fill="none"><ellipse cx="40" cy="160" rx="24" ry="5" fill="rgba(0,0,0,0.25)"/><rect x="18" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><rect x="44" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><ellipse cx="26" cy="158" rx="11" ry="5" fill="#0a0a1a"/><ellipse cx="52" cy="158" rx="11" ry="5" fill="#0a0a1a"/><rect x="12" y="54" width="56" height="62" rx="8" fill="#1a1a2e"/><path d="M28 54 L40 68 L52 54" fill="#141428" opacity="0.8"/><rect x="0" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><rect x="66" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><ellipse cx="7" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="73" cy="106" rx="8" ry="7" fill="#f5c9a0"/><rect x="32" y="44" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="40" cy="30" rx="25" ry="26" fill="#f5c9a0"/><path d="M15 26 C15 8 26 2 40 2 C54 2 65 8 65 26 Z" fill="#8a1a1a"/><path d="M25 8 L22 0 L30 8" fill="#aa2222"/><path d="M38 4 L40 -2 L42 4" fill="#aa2222"/><path d="M52 8 L58 0 L50 8" fill="#aa2222"/><ellipse cx="27" cy="30" rx="4" ry="4" fill="#8a2020"/><ellipse cx="53" cy="30" rx="4" ry="4" fill="#8a2020"/><circle cx="29" cy="28" r="1.5" fill="white"/><circle cx="55" cy="28" r="1.5" fill="white"/><path d="M20 24 L34 22" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M46 22 L60 24" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M34 40 Q40 43 46 40" stroke="#c4645a" stroke-width="1.5" fill="none"/><path d="M15 22 C15 8 25 2 40 2 C55 2 65 8 65 22" stroke="#2a2a4a" stroke-width="5" fill="none"/><rect x="11" y="20" width="8" height="12" rx="3" fill="#2a2a4a"/><rect x="61" y="20" width="8" height="12" rx="3" fill="#2a2a4a"/></svg>
+</div>
+
+<div id="scene-flash"></div>
+<div id="emotion-badge">✨</div>
+
+<!-- DIALOGUE -->
+<div id="dbox" onclick="handleClick()">
+  <div class="dbox-bg"></div><div class="dbox-accent"></div>
+  <div class="dbox-inner">
+    <div id="spk-wrap"><div class="spk-dot" id="spk-dot"></div><div id="spk-name" class="narrator">NARRATOR</div></div>
+    <div id="dlg-text"></div>
+  </div>
+  <div id="dlg-hint">▼ CLICK TO CONTINUE</div>
+</div>
+<div id="choices"></div>
+
+<!-- RUNNER -->
+<div id="runner-overlay">
+  <canvas id="runner-canvas" width="920" height="580"></canvas>
+  <div id="runner-hud">
+    <div><div class="r-hud-label">DISTANCE</div><div class="r-hud-val" id="r-dist">0</div></div>
+    <div><div class="r-hud-label">SCORE</div><div class="r-hud-val" id="r-score">0</div></div>
+    <div><div class="r-hud-label">LIVES</div><div class="r-hud-val" id="r-lives">♥ ♥ ♥</div></div>
+  </div>
+  <div id="runner-bar-wrap">
+    <div class="r-bar-row"><div class="r-bar-label">DESTINATION: ALI'S EVENT SPACE — BUILT FOR IASON</div><div class="r-bar-label" id="r-pct">0%</div></div>
+    <div id="runner-bar"><div id="runner-bar-fill"></div></div>
+  </div>
+  <div id="runner-start">
+    <h3>⟨ RUN, IASON, RUN ⟩</h3>
+    <p>Reach Ali's event space before midnight</p>
+    <div class="how-to">
+      <p>🖱️ <span>CLICK</span> anywhere or press <span>SPACE</span> to jump</p>
+      <p>⬆️ Jump again in the air for a <span>DOUBLE JUMP</span></p>
+      <p>💚 You have <span>3 lives</span> — each obstacle costs 1</p>
+      <p>🟦 <span>Cyan walls</span> = Oz firewalls — jump over them</p>
+      <p>🟣 <span>Purple nodes</span> = corrupted nodes — jump over them</p>
+      <p>🔴 <span>Red cubes</span> = Love Machine debris — avoid them</p>
+      <p>📊 Fill the bar to reach Ali's hidden gift!</p>
+    </div>
+    <button class="start-run-btn" onclick="beginRun()">▶ &nbsp; START RUNNING</button>
+  </div>
+  <div id="runner-result">
+    <div class="rr-title">CONNECTION LOST</div>
+    <div class="rr-score" id="rr-score-val">0</div>
+    <div class="rr-sub">The network closed in — try again</div>
+    <div class="rr-hint">Tip: double jump clears tall obstacles!</div>
+    <button class="rr-retry" onclick="restartRunner()">↺ &nbsp; RECONNECT</button>
+  </div>
+</div>
+
+<!-- EVENT SPACE -->
+<div id="event-overlay">
+  <canvas id="event-canvas" width="920" height="580"></canvas>
+  <div id="event-content">
+    <div class="ev-eyebrow">YOU FOUND IT — ALI'S GIFT TO IASON</div>
+    <div class="ev-title">THE EVENT SPACE</div>
+    <div class="ev-sub">— BUILT IN SECRET · HIDDEN FOR ONE PERSON · MADE WITH RESPECT —</div>
+    <div class="ev-chars">
+      <div class="ev-char-wrap" style="animation-delay:0s">
+        <svg width="55" height="100" viewBox="0 0 88 175" fill="none"><rect x="22" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><rect x="46" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><rect x="16" y="56" width="56" height="68" rx="6" fill="#3a6ab8"/><rect x="4" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><rect x="70" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><ellipse cx="11" cy="110" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="77" cy="110" rx="8" ry="7" fill="#f5c9a0"/><rect x="36" y="46" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="27" ry="28" fill="#f5c9a0"/><path d="M17 28 C17 10 28 4 44 4 C60 4 71 10 71 28 Z" fill="#1a1a2e"/><rect x="23" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><rect x="47" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><circle cx="32" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="56" cy="35" r="3.5" fill="#2a1a0a"/><path d="M38 44 Q44 49 50 44" stroke="#c4845a" stroke-width="2" fill="none"/></svg>
+        <div class="ev-char-name">KENJI</div>
+      </div>
+      <div class="ev-char-wrap" style="animation-delay:.4s">
+        <svg width="55" height="100" viewBox="0 0 88 175" fill="none"><path d="M14 108 Q20 148 44 148 Q68 148 74 108 Z" fill="#c83060"/><rect x="20" y="58" width="48" height="52" rx="6" fill="#e8407a"/><rect x="6" y="62" width="16" height="44" rx="6" fill="#e8407a"/><rect x="66" y="62" width="16" height="44" rx="6" fill="#e8407a"/><ellipse cx="14" cy="108" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="74" cy="108" rx="8" ry="7" fill="#f5c9a0"/><rect x="36" y="48" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="26" ry="27" fill="#f5c9a0"/><ellipse cx="44" cy="28" rx="28" ry="26" fill="#c8602a"/><ellipse cx="33" cy="35" rx="5" ry="6" fill="#3a1060"/><ellipse cx="55" cy="35" rx="5" ry="6" fill="#3a1060"/><path d="M37 44 Q44 50 51 44" stroke="#c4645a" stroke-width="2" fill="none"/></svg>
+        <div class="ev-char-name">NATSUKI</div>
+      </div>
+      <div class="ev-char-wrap" style="animation-delay:.8s">
+        <svg width="50" height="100" viewBox="0 0 80 165" fill="none"><rect x="12" y="54" width="56" height="62" rx="8" fill="#1a1a2e"/><rect x="0" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><rect x="66" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><ellipse cx="7" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="73" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="40" cy="30" rx="25" ry="26" fill="#f5c9a0"/><path d="M15 26 C15 8 26 2 40 2 C54 2 65 8 65 26 Z" fill="#8a1a1a"/><ellipse cx="27" cy="30" rx="4" ry="4" fill="#8a2020"/><ellipse cx="53" cy="30" rx="4" ry="4" fill="#8a2020"/><path d="M34 40 Q40 44 46 40" stroke="#c4645a" stroke-width="1.5" fill="none"/></svg>
+        <div class="ev-char-name">KAZUMA</div>
+      </div>
+      <!-- Iason avatar -->
+      <div class="ev-char-wrap" style="animation-delay:1.2s">
+        <svg width="58" height="108" viewBox="0 0 88 175" fill="none">
+          <ellipse cx="44" cy="170" rx="26" ry="5" fill="rgba(68,255,170,0.2)"/>
+          <rect x="20" y="118" width="18" height="52" rx="4" fill="#1a3a2a"/><rect x="48" y="118" width="18" height="52" rx="4" fill="#1a3a2a"/>
+          <rect x="14" y="56" width="60" height="66" rx="8" fill="#1a4a3a"/>
+          <path d="M30 56 L44 72 L58 56" fill="#0a2a1a" opacity="0.9"/>
+          <rect x="32" y="60" width="24" height="28" rx="3" fill="rgba(68,255,170,0.12)" stroke="rgba(68,255,170,0.35)" stroke-width="1"/>
+          <rect x="2" y="60" width="14" height="50" rx="6" fill="#1a4a3a"/><rect x="72" y="60" width="14" height="50" rx="6" fill="#1a4a3a"/>
+          <ellipse cx="9" cy="112" rx="8" ry="7" fill="#d4b896"/><ellipse cx="79" cy="112" rx="8" ry="7" fill="#d4b896"/>
+          <rect x="34" y="46" width="20" height="14" rx="5" fill="#d4b896"/>
+          <ellipse cx="44" cy="32" rx="26" ry="27" fill="#d4b896"/>
+          <path d="M18 24 C18 4 30 -2 44 -2 C58 -2 70 4 70 24" fill="#3a2010"/>
+          <circle cx="20" cy="20" r="6" fill="#3a2010"/><circle cx="30" cy="13" r="7" fill="#4a2818"/><circle cx="44" cy="10" r="7" fill="#3a2010"/><circle cx="58" cy="13" r="7" fill="#4a2818"/><circle cx="68" cy="20" r="6" fill="#3a2010"/>
+          <ellipse cx="34" cy="33" rx="4" ry="4" fill="#2a4a1a"/><ellipse cx="54" cy="33" rx="4" ry="4" fill="#2a4a1a"/>
+          <circle cx="36" cy="31" r="1.5" fill="white"/><circle cx="56" cy="31" r="1.5" fill="white"/>
+          <path d="M37 43 Q44 48 51 43" stroke="#b08060" stroke-width="2" fill="none"/>
+          <ellipse cx="44" cy="32" rx="28" ry="28" fill="none" stroke="rgba(68,255,170,0.2)" stroke-width="2"/>
+        </svg>
+        <div class="ev-char-name" style="color:#44ffaa">IASON</div>
+      </div>
+    </div>
+    <div class="ev-continue" onclick="showAliMessage()">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- ALI'S MESSAGE -->
+<div id="ali-overlay">
+  <div class="ali-bg"></div><div class="ali-grid"></div><div class="ali-vignette"></div>
+  <div id="ali-content">
+    <div class="ali-from">FROM ALI — TO IASON</div>
+    <div class="ali-line"></div>
+    <div class="ali-sig-wrap">
+      <div class="ali-aura"></div>
+      <div class="ali-name-badge">ALI</div>
+      <div class="ali-tag">THE GUY WHO BUILT THIS FOR YOU</div>
+    </div>
+    <div id="ali-msg"></div>
+    <div class="ali-sig">— Ali. Your colleague. Happy Birthday.</div>
+    <div id="ali-continue" onclick="showFinalCard()">▼ CONTINUE</div>
+  </div>
+</div>
+
+<!-- FINAL CARD -->
+<div id="final-card">
+  <canvas id="fc-canvas" width="920" height="580"></canvas>
+  <div class="fc-content">
+    <div class="fc-label">SUMMER WARS: THE BIRTHDAY PROTOCOL — COMPLETE</div>
+    <div class="fc-line"></div>
+    <div class="fc-from">— FROM ALI, WITH RESPECT —</div>
+    <div class="fc-bday">HAPPY BIRTHDAY</div>
+    <div class="fc-name">IASON</div>
+    <div class="fc-emoji">🎉 🎂 🎉</div>
+    <div class="fc-text">You are the kind of person who fixes things nobody asks them to fix. Who shows up. Who goes deep on the things that matter. This game was built inside the world you love, with the characters you love, with you as the hero — because that's what you are. Hope it landed.</div>
+    <div class="fc-credits">SUMMER WARS © MAMORU HOSODA / MADHOUSE<br>FAN PROJECT · NON-COMMERCIAL · MADE BY ALI FOR IASON</div>
+  </div>
+</div>
+
+<!-- CHAPTER TITLE -->
+<div id="chapter-title">
+  <div id="title-stars"></div>
+  <div class="pre-title">SUMMER WARS: THE BIRTHDAY PROTOCOL</div>
+  <div class="game-title">CHAPTER THREE</div>
+  <div class="game-sub">MIDNIGHT IN OZ</div>
+  <div class="t-line"></div>
+  <div class="ch-num">03</div>
+  <div class="ch-title">RUN, IASON, RUN</div>
+  <div class="ch-sub">— THE FINAL SPRINT TO ALI'S GIFT —</div>
+  <button class="start-btn" onclick="startGame()">▶ &nbsp; BEGIN</button>
+</div>
+
+<script>
+/* ── AMBIENT ── */
+const stC=document.getElementById('stars-c');
+for(let i=0;i<100;i++){const s=document.createElement('div');const sz=Math.random()*2+.4;s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:${['#fff','#aaffcc','#aaddff','#ccaaff'][i%4]};top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.6+.1};animation:tw${i%3} ${2+Math.random()*5}s ease-in-out infinite ${Math.random()*4}s;`;stC.appendChild(s);}
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes tw0{0%,100%{opacity:.7}50%{opacity:.05}}@keyframes tw1{0%,100%{opacity:.4}50%{opacity:.08}}@keyframes tw2{0%,100%{opacity:.8}50%{opacity:.12}}</style>');
+const tsC=document.getElementById('title-stars');
+for(let i=0;i<50;i++){const s=document.createElement('div');const sz=Math.random()*2+.4;s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:white;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.4+.1};animation:tw0 ${3+Math.random()*4}s ease-in-out infinite ${Math.random()*4}s;`;tsC.appendChild(s);}
+const srC=document.getElementById('streams-c');
+const JP='アイウエオカキクサシスタチツナニヌ0123456789ABCDEF∞∑∆Ω';
+function spawnStream(){const d=document.createElement('div');d.className='data-stream';d.style.left=Math.random()*920+'px';d.style.top='-20px';d.style.color=Math.random()>.5?'rgba(68,255,170,.12)':'rgba(94,230,255,.1)';d.style.animationDuration=(8+Math.random()*8)+'s';let t='';for(let i=0;i<8;i++)t+=JP[Math.floor(Math.random()*JP.length)]+'\n';d.textContent=t;srC.appendChild(d);setTimeout(()=>d.remove(),16000);}
+setInterval(spawnStream,700);
+
+/* ── DIALOGUE STATE ── */
+let scene=0,typing=false,tiInt=null;
+const DOTCOLS={narrator:'#a0c8ff',kenji:'#5ee6ff',natsuki:'#ff7aaa',kazuma:'#ff6a30',iason:'#44ffaa',ali:'#ffcc00',system:'#a070ff'};
+
+/* ══════════════════════════════════
+   SCENES
+   CORRECT LOGIC:
+   - Ali = the builder, the gift-giver
+   - Iason = Greek programmer, birthday boy, the one being celebrated
+   - Kenji/Natsuki/Kazuma = discover Ali's gift and help reach it
+   - Iason connects live — he's watching them find what Ali built FOR HIM
+   - Final message = Ali speaking directly to Iason
+══════════════════════════════════ */
+const S=[
+/* 0 */{sp:'NARRATOR',cls:'narrator',txt:'Midnight is thirty minutes away. The Jinnouchi courtyard table has three cold plates of curry on it and nobody cares. This is what happens when you let Kenji Koiso near an encrypted anomaly at a family dinner.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 1 */{sp:'KENJI',cls:'kenji',txt:'Ali\'s event space is in deep layer seven. But the Love Machine fragment is spreading a corruption field across the access corridor. It\'s not attacking — it\'s more like it\'s hovering. Watching the path.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'🔍 Path blocked'},
+/* 2 */{sp:'NATSUKI',cls:'natsuki',txt:'So we move before it decides to do something worse. Get to the event space, get inside Ali\'s encryption walls. Once we\'re in, the fragment can\'t reach it.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💪 One shot at this'},
+/* 3 */{sp:'KAZUMA',cls:'kazuma',txt:'The northern corridor is the fastest route. But it\'s full of corrupted infrastructure and Love Machine debris. Whoever runs it needs to know the path.',chars:{kenji:1,kazuma:1},emotion:null},
+/* 4 */{sp:'SYSTEM',cls:'system',txt:'[ OZ CHANNEL — DEEP NODE // MASKED ORIGIN ] CONNECTION: ALI // STATUS: LIVE // MSG: "I can see all of you. I\'ve been watching since Chapter 1. The northern corridor — I mapped every obstacle. I\'ll light the path. Just run."',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💛 Ali is watching!'},
+/* 5 */{sp:'KENJI',cls:'kenji',txt:'(quietly) He\'s been here this whole time. Behind the mask. Watching us find everything he built.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 6 */{sp:'NATSUKI',cls:'natsuki',txt:'(to Kenji) Does Iason know? That all of this — the cipher, the nodes, the gift — it\'s for him?',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 7 */{sp:'KENJI',cls:'kenji',txt:'Not yet. That\'s the point. Ali built this so that Iason finds it. So it arrives. So his friend knows someone went all the way into the network just to say: I see you.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💚 That\'s the whole thing'},
+/* 8 */{sp:'KAZUMA',cls:'kazuma',txt:'(stands up, already logging in) Then we make sure it gets there. Kenji — track the fragment. Natsuki — watch the corridor. I\'ll run the path.',chars:{kenji:1,kazuma:1},emotion:'😤 Let\'s go'},
+/* 9 */{sp:'SYSTEM',cls:'system',txt:'[ ALI ] "No. Not Kazuma. The corridor responds to one avatar signature — the one the gift is built for. Iason has been in these layers for months. His footprint is already in the architecture. He runs it."',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 10 */{sp:'KAZUMA',cls:'kazuma',txt:'(pause) ...So Iason has to run his own birthday gift home.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'😶 That\'s wild'},
+/* 11 */{sp:'IASON',cls:'iason',txt:'(connecting, voice calm) ...Yeah. I know this path. I\'ve been maintaining it without knowing what it was for. I\'ll run it.\n...Ali. You absolute maniac.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'🟢 Iason steps up'},
+/* 12 */{sp:'ALI',cls:'ali',txt:'(from the masked channel, just two words) Happy birthday.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💛 There it is.'},
+/* 13 */{sp:'NARRATOR',cls:'narrator',txt:'The northern corridor opens. The Love Machine fragment surges. Iason\'s avatar steps to the line — and the race to the last hidden space in Oz begins.',chars:{},emotion:null,runner:true},
+/* 14 — POST RUNNER */{sp:'NARRATOR',cls:'narrator',txt:'Obstacles blur past. Data walls. Corrupted nodes. Fragments of dead code. And then — at the end of the corridor — light. Warm, green, alive. The thing Ali spent six months building, waiting exactly where he left it.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'✨ Almost there...'},
+/* 15 */{sp:'IASON',cls:'iason',txt:'(stopping, looking at it) ...He actually built this.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 16 */{sp:'KENJI',cls:'kenji',txt:'Six months. According to the node logs. He was in here every week, adding things, making sure it held. He never told anyone.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 17 */{sp:'IASON',cls:'iason',txt:'(quietly) Why would he do all of this.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null,
+  choices:[
+    {label:'A — Because that\'s what friends do.',txt:'Kenji: Because he knows you. And he went as deep as he could to prove it. That\'s the whole thing.'},
+    {label:'B — Because you\'re worth it.',txt:'Natsuki: Because some people show up for their friends in ways that words can\'t cover. So they build things instead.'},
+  ]},
+/* 18 */{sp:'KAZUMA',cls:'kazuma',txt:'(deadpan) Because you\'re the kind of person who fixes other people\'s problems without being asked. He returned the favour. At scale.\n...Also it\'s your birthday. Go in.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'😏 Kazuma with the line'},
+/* 19 */{sp:'NARRATOR',cls:'narrator',txt:'The event space opens. Ali\'s architecture blooms — and across the entire Oz network, the birthday celebration he built for his Greek friend begins to play.',chars:{},emotion:null,event:true},
+];
+
+function typeText(txt,cb){
+  typing=true;if(tiInt)clearInterval(tiInt);
+  const el=document.getElementById('dlg-text');el.textContent='';let i=0;
+  tiInt=setInterval(()=>{el.textContent+=txt[i]||'';i++;if(i>=txt.length){clearInterval(tiInt);tiInt=null;typing=false;if(cb)cb();}},16);
+}
+function setSpeaker(sp,cls){
+  const n=document.getElementById('spk-name');n.textContent=sp;n.className=cls;
+  const d=document.getElementById('spk-dot');d.style.background=DOTCOLS[cls]||'#a0c8ff';d.style.boxShadow=`0 0 8px ${DOTCOLS[cls]||'#a0c8ff'}`;
+}
+function showEmotion(e){if(!e)return;const b=document.getElementById('emotion-badge');b.textContent=e;b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2600);}
+function flashScene(){const f=document.getElementById('scene-flash');f.style.opacity='.7';setTimeout(()=>f.style.opacity='0',300);}
+function showChoices(arr){
+  const ch=document.getElementById('choices');ch.innerHTML='';
+  arr.forEach((c,i)=>{const btn=document.createElement('button');btn.className='choice-btn';btn.innerHTML=`<div class="choice-label">RESPONSE ${String.fromCharCode(65+i)}</div>${c.label}`;btn.onclick=e=>{e.stopPropagation();selectChoice(c);};ch.appendChild(btn);});
+  ch.classList.add('show');document.getElementById('dlg-hint').style.display='none';document.getElementById('dbox').style.pointerEvents='none';
+}
+function selectChoice(c){
+  document.getElementById('choices').classList.remove('show');document.getElementById('choices').innerHTML='';
+  document.getElementById('dlg-hint').style.display='block';document.getElementById('dbox').style.pointerEvents='all';
+  typeText(c.txt,()=>{});
+  document.getElementById('dbox').onclick=()=>{document.getElementById('dbox').onclick=()=>handleClick();scene++;renderScene();};
+}
+function renderScene(){
+  if(scene>=S.length)return;
+  const s=S[scene];
+  ['kenji','natsuki','kazuma'].forEach(c=>{document.getElementById('char-'+c).style.opacity=(s.chars&&s.chars[c])?'1':'0';});
+  setSpeaker(s.sp,s.cls);typeText(s.txt,()=>{if(s.choices)showChoices(s.choices);});showEmotion(s.emotion);
+  if(s.runner){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startRunner,900);}
+  if(s.event){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startEventSpace,800);}
+}
+function handleClick(){
+  if(document.getElementById('choices').classList.contains('show'))return;
+  if(typing){if(tiInt)clearInterval(tiInt);tiInt=null;typing=false;document.getElementById('dlg-text').textContent=S[scene].txt;if(S[scene].choices)showChoices(S[scene].choices);return;}
+  if(scene>=S.length-1)return;
+  scene++;renderScene();
+}
+
+/* ════════════════════════
+   RUNNER GAME
+   ════════════════════════ */
+const RC=document.getElementById('runner-canvas');
+const RX=RC.getContext('2d');
+const W=920,H=580,GROUND_Y=360,CHAR_W=28,CHAR_H=56;
+let rState='idle',rDist=0,rScore=0,rLives=3,rSpeed=0,rFrame=0,rRAF=null,rLastTS=0;
+let obs=[],particles=[],rObsTimer=0,rObsInterval=2200;
+const P={x:110,y:GROUND_Y,vy:0,onGround:true,jumps:0,legT:0,invincible:0};
+const MILESTONE=2800;
+
+function resetRunner(){
+  rState='idle';rDist=0;rScore=0;rLives=3;rSpeed=4.2;rFrame=0;rObsTimer=0;rObsInterval=2200;
+  P.x=110;P.y=GROUND_Y;P.vy=0;P.onGround=true;P.jumps=0;P.legT=0;P.invincible=0;
+  obs=[];particles=[];
+  document.getElementById('r-dist').textContent='0';
+  document.getElementById('r-score').textContent='0';
+  document.getElementById('r-lives').textContent='♥ ♥ ♥';
+  document.getElementById('runner-bar-fill').style.width='0%';
+  document.getElementById('r-pct').textContent='0%';
+  document.getElementById('runner-result').classList.remove('show');
+}
+
+function startRunner(){
+  resetRunner();
+  document.getElementById('runner-overlay').classList.add('active');
+  document.getElementById('runner-start').style.display='block';
+  rRAF=requestAnimationFrame(runLoop);
+}
+
+function beginRun(){
+  document.getElementById('runner-start').style.display='none';
+  rState='running';
+  document.addEventListener('keydown',onKey);
+  RC.addEventListener('click',doJump);
+}
+
+function onKey(e){if((e.code==='Space'||e.code==='ArrowUp')&&rState==='running'){e.preventDefault();doJump();}}
+
+function doJump(){
+  if(rState!=='running')return;
+  if(P.jumps<2){P.vy=-15;P.onGround=false;P.jumps++;spawnParts(P.x+CHAR_W/2,P.y+CHAR_H,'#44ffaa',5);}
+}
+
+function restartRunner(){
+  document.getElementById('runner-result').classList.remove('show');
+  resetRunner();document.getElementById('runner-start').style.display='none';rState='running';
+}
+
+function spawnParts(x,y,col,n){for(let i=0;i<n;i++)particles.push({x,y,vx:(Math.random()-.5)*3,vy:Math.random()*-3-1,life:1,col,r:Math.random()*2+1});}
+
+const OBS_TYPES=[
+  {id:'wall-low',w:18,h:38,col:'#5ee6ff',label:'FIREWALL',phase:1},
+  {id:'wall-mid',w:18,h:54,col:'#5ee6ff',label:'FIREWALL',phase:2},
+  {id:'node',w:28,h:28,col:'#a070ff',label:'NODE',phase:2},
+  {id:'lm-s',w:26,h:26,col:'#ff4466',label:'LM-FRAG',phase:2},
+  {id:'lm-b',w:32,h:44,col:'#ff0055',label:'LM-CORE',phase:3},
+];
+
+function spawnObs(){
+  const phase=rDist<900?1:rDist<1900?2:3;
+  const pool=OBS_TYPES.filter(t=>t.phase<=phase);
+  const t=pool[Math.floor(Math.random()*pool.length)];
+  obs.push({...t,x:W+20,y:GROUND_Y+CHAR_H-t.h,angle:0});
+}
+
+let bgScroll=0;
+function runLoop(ts){
+  rRAF=requestAnimationFrame(runLoop);
+  const dt=Math.min((ts-rLastTS)/16.67,3);rLastTS=ts;
+  RX.clearRect(0,0,W,H);bgScroll+=rState==='running'?rSpeed*dt*.4:0;
+  drawBG();
+  if(rState==='running'){
+    rFrame+=dt;P.vy+=0.75*dt;P.y+=P.vy*dt;
+    if(P.y>=GROUND_Y){P.y=GROUND_Y;P.vy=0;P.onGround=true;P.jumps=0;}else P.onGround=false;
+    if(P.onGround)P.legT+=0.2*dt;
+    if(P.invincible>0)P.invincible-=dt;
+    rSpeed=4.2+rDist/1000;rDist+=rSpeed*dt;rScore=Math.floor(rDist*2);
+    rObsTimer+=dt*16.67;
+    if(rObsTimer>=rObsInterval){rObsTimer=0;rObsInterval=Math.max(1100,2200-rDist/3);spawnObs();}
+    obs.forEach(o=>{o.x-=rSpeed*dt;if(o.id.startsWith('lm'))o.angle+=0.04*dt;});
+    obs=obs.filter(o=>o.x>-60);
+    if(P.invincible<=0){obs.forEach(o=>{const m=6;if(P.x+CHAR_W-m>o.x+m&&P.x+m<o.x+o.w-m&&P.y+CHAR_H-m>o.y+m&&P.y<o.y+o.h-m)takeHit(o);});}
+    if(rDist>=MILESTONE){rState='won';setTimeout(runnerWin,500);return;}
+    document.getElementById('r-dist').textContent=Math.floor(rDist);
+    document.getElementById('r-score').textContent=rScore;
+    const pct=Math.min(100,Math.floor(rDist/MILESTONE*100));
+    document.getElementById('runner-bar-fill').style.width=pct+'%';
+    document.getElementById('r-pct').textContent=pct+'%';
+  }
+  particles.forEach(p=>{p.x+=p.vx*dt;p.y+=p.vy*dt;p.vy+=0.12*dt;p.life-=0.04*dt;
+    RX.globalAlpha=Math.max(0,p.life);RX.fillStyle=p.col;RX.beginPath();RX.arc(p.x,p.y,p.r,0,Math.PI*2);RX.fill();RX.globalAlpha=1;});
+  particles=particles.filter(p=>p.life>0);
+  obs.forEach(o=>drawObs(o));
+  drawPlayer();
+  if(P.invincible>0&&Math.floor(P.invincible*4)%2===0){RX.globalAlpha=0.2;RX.fillStyle='#ff4466';RX.fillRect(0,0,W,H);RX.globalAlpha=1;}
+  // Finish glow
+  const fd=MILESTONE-rDist;
+  if(fd<400){
+    const alpha=Math.min(0.3,(400-fd)/400*.3);
+    const g=RX.createLinearGradient(W-100,0,W,0);g.addColorStop(0,'transparent');g.addColorStop(1,`rgba(68,255,170,${alpha})`);
+    RX.fillStyle=g;RX.fillRect(0,0,W,H);
+    RX.fillStyle=`rgba(68,255,170,${alpha*3})`;RX.font='bold 13px Orbitron';RX.textAlign='center';
+    RX.fillText("ALI'S GIFT — STRAIGHT AHEAD →",W-130,GROUND_Y-20);
+  }
+}
+
+function drawBG(){
+  const sky=RX.createLinearGradient(0,0,0,GROUND_Y);sky.addColorStop(0,'#010b18');sky.addColorStop(1,'#020e12');
+  RX.fillStyle=sky;RX.fillRect(0,0,W,GROUND_Y);
+  RX.strokeStyle='rgba(68,255,170,0.1)';RX.lineWidth=1;
+  const vp={x:W/2,y:GROUND_Y};
+  for(let i=0;i<12;i++){const x=(-W/2)+(i/11)*W*2;RX.beginPath();RX.moveTo(vp.x,vp.y);RX.lineTo(x,0);RX.stroke();}
+  for(let d=0;d<6;d++){const prog=(d/6+bgScroll/300)%1,y=GROUND_Y-(1-prog)*GROUND_Y*.8,alpha=prog*.15;RX.strokeStyle=`rgba(68,255,170,${alpha})`;RX.beginPath();RX.moveTo(0,y);RX.lineTo(W,y);RX.stroke();}
+  const grd=RX.createLinearGradient(0,GROUND_Y,0,H);grd.addColorStop(0,'rgba(68,255,170,0.12)');grd.addColorStop(1,'rgba(0,30,15,0.05)');
+  RX.fillStyle=grd;RX.fillRect(0,GROUND_Y,W,H-GROUND_Y);
+  RX.strokeStyle='rgba(68,255,170,0.5)';RX.lineWidth=2;RX.beginPath();RX.moveTo(0,GROUND_Y+CHAR_H);RX.lineTo(W,GROUND_Y+CHAR_H);RX.stroke();
+  const dashOffset=bgScroll%80;RX.strokeStyle='rgba(68,255,170,0.2)';RX.lineWidth=1;RX.setLineDash([40,40]);
+  RX.lineDashOffset=-dashOffset;RX.beginPath();RX.moveTo(0,GROUND_Y+CHAR_H+8);RX.lineTo(W,GROUND_Y+CHAR_H+8);RX.stroke();RX.setLineDash([]);
+  // LM chaser
+  if(rState==='running'){const cf=Math.min(1,rDist/300);drawLMChaser(20,GROUND_Y+CHAR_H/2-16,36,cf*.7);}
+}
+
+function drawLMChaser(x,y,size,alpha){
+  const t=Date.now()/800;RX.save();RX.globalAlpha=alpha;RX.translate(x,y);RX.rotate(t);
+  RX.strokeStyle='#ff2255';RX.lineWidth=1.5;const s=size/2;
+  for(let i=0;i<3;i++){const off=Math.sin(t*3+i)*3;RX.beginPath();RX.rect(-s+off,-s+off,s*2-off,s*2-off);RX.stroke();}
+  RX.fillStyle='rgba(255,0,60,0.06)';RX.fillRect(-s,-s,s*2,s*2);
+  [[-s,-s],[s,-s],[s,s],[-s,s]].forEach(([px,py])=>{RX.fillStyle='rgba(255,0,80,0.6)';RX.beginPath();RX.arc(px,py,2.5,0,Math.PI*2);RX.fill();});
+  RX.restore();
+}
+
+function drawObs(o){
+  RX.save();
+  if(o.id.startsWith('lm')){
+    RX.translate(o.x+o.w/2,o.y+o.h/2);RX.rotate(o.angle);const s=o.w/2;
+    for(let i=0;i<3;i++){const off=Math.sin(o.angle*3+i)*2;RX.strokeStyle=o.col;RX.lineWidth=1.5+i*.5;RX.beginPath();RX.rect(-s+off,-s+off,(s-off)*2,(s-off)*2);RX.stroke();}
+    RX.fillStyle='rgba(255,0,80,0.08)';RX.fillRect(-s,-s,s*2,s*2);
+    [[-s,-s],[s,-s],[s,s],[-s,s]].forEach(([px,py])=>{RX.fillStyle=o.col;RX.shadowColor=o.col;RX.shadowBlur=6;RX.beginPath();RX.arc(px,py,3,0,Math.PI*2);RX.fill();});
+  } else {
+    RX.shadowColor=o.col;RX.shadowBlur=10;
+    const grad=RX.createLinearGradient(o.x,o.y,o.x,o.y+o.h);grad.addColorStop(0,o.col);grad.addColorStop(1,o.col+'88');
+    RX.fillStyle=grad;RX.fillRect(o.x,o.y,o.w,o.h);RX.shadowBlur=0;
+    RX.fillStyle='rgba(255,255,255,0.3)';RX.fillRect(o.x,o.y,o.w,3);
+    RX.fillStyle='rgba(255,255,255,0.35)';RX.font='6px Orbitron';RX.textAlign='center';RX.fillText(o.label,o.x+o.w/2,o.y-4);
+  }
+  RX.restore();
+}
+
+function drawPlayer(){
+  const x=P.x,y=P.y,w=CHAR_W,h=CHAR_H;
+  const bob=P.onGround?Math.sin(P.legT)*1.5:0;
+  const legSwing=P.onGround?Math.sin(P.legT)*10:0;
+  RX.save();
+  const aura=RX.createRadialGradient(x+w/2,y+h/2,0,x+w/2,y+h/2,h*.9);
+  aura.addColorStop(0,'rgba(68,255,170,0.12)');aura.addColorStop(1,'transparent');
+  RX.fillStyle=aura;RX.fillRect(x-20,y-10,w+40,h+20);
+  if(P.y>=GROUND_Y-2){RX.fillStyle='rgba(68,255,170,0.12)';RX.beginPath();RX.ellipse(x+w/2,GROUND_Y+h+2,w*.7,4,0,0,Math.PI*2);RX.fill();}
+  RX.fillStyle='#1a4a3a';
+  RX.beginPath();RX.roundRect(x+3,y+h*.6+bob,w*.38,h*.42,3);RX.fill();
+  RX.beginPath();RX.roundRect(x+w*.52,y+h*.6+bob,w*.38,h*.42,3);RX.fill();
+  RX.fillStyle='#0a2a1a';
+  RX.beginPath();RX.ellipse(x+7+legSwing*.3,y+h+bob,9,4,0,0,Math.PI*2);RX.fill();
+  RX.beginPath();RX.ellipse(x+w-7-legSwing*.3,y+h+bob,9,4,0,0,Math.PI*2);RX.fill();
+  RX.fillStyle='#1a4a3a';RX.shadowColor='rgba(68,255,170,0.25)';RX.shadowBlur=6;
+  RX.beginPath();RX.roundRect(x+1,y+h*.28+bob,w-2,h*.36,4);RX.fill();RX.shadowBlur=0;
+  RX.strokeStyle='rgba(68,255,170,0.4)';RX.lineWidth=1;
+  RX.beginPath();RX.roundRect(x+w*.22,y+h*.33+bob,w*.56,h*.22,2);RX.stroke();
+  RX.fillStyle='#1a4a3a';
+  RX.beginPath();RX.roundRect(x-3,y+h*.28+bob+legSwing*.4,7,h*.28,3);RX.fill();
+  RX.beginPath();RX.roundRect(x+w-4,y+h*.28+bob-legSwing*.4,7,h*.28,3);RX.fill();
+  RX.fillStyle='#d4b896';RX.beginPath();RX.ellipse(x+w/2,y+h*.16+bob,w*.46,h*.2,0,0,Math.PI*2);RX.fill();
+  RX.fillStyle='#3a2010';
+  for(let i=0;i<4;i++){RX.beginPath();RX.arc(x+w/2-w*.28+i*w*.19,y+h*.07+bob,w*.15,0,Math.PI*2);RX.fill();}
+  RX.fillStyle='#2a4a1a';
+  RX.beginPath();RX.ellipse(x+w/2-w*.16,y+h*.16+bob,2.5,2.5,0,0,Math.PI*2);RX.fill();
+  RX.beginPath();RX.ellipse(x+w/2+w*.16,y+h*.16+bob,2.5,2.5,0,0,Math.PI*2);RX.fill();
+  RX.restore();
+}
+
+function takeHit(o){
+  rLives--;P.invincible=90;obs=obs.filter(ob=>ob!==o);spawnParts(o.x+o.w/2,o.y+o.h/2,o.col,12);
+  const hearts=['',' ♥',' ♥ ♥',' ♥ ♥ ♥'];
+  document.getElementById('r-lives').textContent=hearts[Math.max(0,rLives)]||'';
+  if(rLives<=0){rState='dead';document.getElementById('rr-score-val').textContent=rScore;setTimeout(()=>document.getElementById('runner-result').classList.add('show'),400);}
+}
+
+function runnerWin(){
+  cancelAnimationFrame(rRAF);
+  document.removeEventListener('keydown',onKey);RC.removeEventListener('click',doJump);
+  document.getElementById('runner-overlay').classList.remove('active');
+  document.getElementById('dbox').style.pointerEvents='all';
+  flashScene();scene++;renderScene();
+}
+
+/* ════════════════════════
+   EVENT SPACE
+   ════════════════════════ */
+const EVC=document.getElementById('event-canvas');
+const EVX=EVC.getContext('2d');
+let evRAF=null,evT=0,fworks=[];
+
+function spawnFW(){
+  const x=100+Math.random()*720,y=40+Math.random()*220;
+  const cols=['#44ffaa','#5ee6ff','#ffcc00','#ff9a5c','#a070ff','#ff7aaa','#fff'];
+  const col=cols[Math.floor(Math.random()*cols.length)];
+  const ps=[];for(let i=0;i<45;i++){const a=Math.random()*Math.PI*2,spd=1.5+Math.random()*5;ps.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,col});}
+  fworks.push({ps});
+}
+
+function evLoop(){
+  evRAF=requestAnimationFrame(evLoop);evT+=0.016;
+  EVX.clearRect(0,0,920,580);
+  const bg=EVX.createRadialGradient(460,240,0,460,240,500);
+  bg.addColorStop(0,'rgba(5,20,12,0.75)');bg.addColorStop(1,'rgba(1,5,3,0.92)');
+  EVX.fillStyle=bg;EVX.fillRect(0,0,920,580);
+  EVX.strokeStyle='rgba(68,255,170,0.07)';EVX.lineWidth=1;
+  for(let x=0;x<920;x+=40){EVX.beginPath();EVX.moveTo(x,0);EVX.lineTo(x,580);EVX.stroke();}
+  for(let y=0;y<580;y+=40){EVX.beginPath();EVX.moveTo(0,y);EVX.lineTo(920,y);EVX.stroke();}
+  for(let i=0;i<8;i++){
+    const nx=80+i*106+Math.sin(evT+i)*18,ny=120+Math.cos(evT*.7+i*1.2)*28;
+    const cols=['#44ffaa','#5ee6ff','#ffcc00','#a070ff','#ff7aaa'];
+    EVX.strokeStyle=cols[i%5];EVX.lineWidth=1.5;EVX.shadowColor=cols[i%5];EVX.shadowBlur=10;
+    EVX.beginPath();EVX.arc(nx,ny,9,0,Math.PI*2);EVX.stroke();EVX.shadowBlur=0;
+  }
+  EVX.fillStyle='rgba(68,255,170,0.04)';EVX.font='bold 160px Orbitron';EVX.textAlign='center';EVX.fillText('OZ',460,290);
+  if(Math.random()<0.06)spawnFW();
+  fworks.forEach(fw=>{fw.ps.forEach(p=>{p.x+=p.vx*.92;p.y+=p.vy*.92;p.vy+=0.07;p.life-=0.014;EVX.globalAlpha=Math.max(0,p.life);EVX.fillStyle=p.col;EVX.beginPath();EVX.arc(p.x,p.y,2,0,Math.PI*2);EVX.fill();});fw.ps=fw.ps.filter(p=>p.life>0);});
+  fworks=fworks.filter(fw=>fw.ps.length>0);EVX.globalAlpha=1;
+}
+
+function startEventSpace(){
+  document.getElementById('event-overlay').classList.add('show');
+  for(let i=0;i<6;i++)setTimeout(spawnFW,i*250);
+  evLoop();
+}
+
+function showAliMessage(){
+  cancelAnimationFrame(evRAF);
+  document.getElementById('event-overlay').classList.remove('show');
+  document.getElementById('ali-overlay').classList.add('show');
+  /* ALI'S MESSAGE — direct, genuine, bro energy, no cheese */
+  const msg="Iason.\n\nWe work together every day, and I think you already know I pay attention. You're the kind of person who does good work quietly — not for credit, not for applause — just because it needs doing. That's rare. Worth acknowledging.\n\nSo I built this. Inside the world you love, with the characters you love, with you as the one everyone is trying to reach. Because that felt right. Because on your birthday, you should know that the people around you notice who you are.\n\nI hope today is a good one. You've earned it.\n\nHappy Birthday, Iason.";
+  let i=0;const el=document.getElementById('ali-msg');el.textContent='';
+  const t=setInterval(()=>{el.textContent+=msg[i]||'';i++;if(i>=msg.length)clearInterval(t);},18);
+}
+
+function showFinalCard(){
+  document.getElementById('ali-overlay').classList.remove('show');
+  document.getElementById('final-card').classList.add('show');
+  startFinalFireworks();
+}
+
+/* FINAL FIREWORKS */
+const FCC=document.getElementById('fc-canvas');
+const FCX=FCC.getContext('2d');
+let fcFworks=[];
+
+function fcSpawnFW(){
+  const x=60+Math.random()*800,y=20+Math.random()*320;
+  const cols=['#44ffaa','#5ee6ff','#ffcc00','#ff9a5c','#a070ff','#ff7aaa','#fff','#ffeeaa'];
+  const col=cols[Math.floor(Math.random()*cols.length)];
+  const ps=[];for(let i=0;i<60;i++){const a=Math.random()*Math.PI*2,spd=1+Math.random()*6;ps.push({x,y,vx:Math.cos(a)*spd,vy:Math.sin(a)*spd,life:1,col,r:Math.random()*2.5+.5});}
+  fcFworks.push({ps});
+}
+
+function startFinalFireworks(){
+  for(let i=0;i<10;i++)setTimeout(fcSpawnFW,i*180);
+  (function loop(){
+    requestAnimationFrame(loop);
+    FCX.fillStyle='rgba(1,5,3,0.18)';FCX.fillRect(0,0,920,580);
+    if(Math.random()<0.07)fcSpawnFW();
+    fcFworks.forEach(fw=>{fw.ps.forEach(p=>{p.x+=p.vx;p.y+=p.vy;p.vy+=0.06;p.vx*=.97;p.vy*=.97;p.life-=0.011;FCX.globalAlpha=Math.max(0,p.life*.85);FCX.fillStyle=p.col;FCX.shadowColor=p.col;FCX.shadowBlur=3;FCX.beginPath();FCX.arc(p.x,p.y,p.r,0,Math.PI*2);FCX.fill();});fw.ps=fw.ps.filter(p=>p.life>0);});
+    fcFworks=fcFworks.filter(fw=>fw.ps.length>0);FCX.globalAlpha=1;FCX.shadowBlur=0;
+  })();
+}
+
+function startGame(){
+  document.getElementById('chapter-title').style.opacity='0';
+  setTimeout(()=>{document.getElementById('chapter-title').style.display='none';document.getElementById('dbox').style.display='block';renderScene();},1000);
+}
+document.getElementById('dbox').onclick=handleClick;
+</script>
+</body>
+</html>

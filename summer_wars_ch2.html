@@ -1,0 +1,747 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Summer Wars: The Birthday Protocol — Chapter 2</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700;900&family=Orbitron:wght@400;600;700;900&family=Share+Tech+Mono&display=swap');
+*{margin:0;padding:0;box-sizing:border-box;}
+body{background:#000;font-family:'Noto Sans JP',sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}
+#game{width:920px;height:580px;position:relative;overflow:hidden;border-radius:6px;box-shadow:0 0 80px rgba(80,160,255,0.35),0 0 160px rgba(80,160,255,0.12);}
+
+/* ═══ OZ BG ═══ */
+#bg-oz{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#0a1840 0%,#040d20 50%,#020810 100%);}
+.oz-grid-far{position:absolute;bottom:0;left:0;right:0;height:320px;background-image:linear-gradient(rgba(0,150,255,.15) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.15) 1px,transparent 1px);background-size:60px 60px;transform:perspective(500px) rotateX(62deg);transform-origin:bottom center;animation:gridScroll 5s linear infinite;}
+@keyframes gridScroll{from{background-position:0 0}to{background-position:0 60px}}
+.oz-grid-top{position:absolute;top:0;left:0;right:0;height:260px;background-image:linear-gradient(rgba(0,150,255,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.06) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 8s linear infinite;}
+@keyframes gridMove{from{background-position:0 0}to{background-position:0 40px}}
+.oz-nebula{position:absolute;border-radius:50%;filter:blur(70px);pointer-events:none;animation:nebPulse 6s ease-in-out infinite;}
+@keyframes nebPulse{0%,100%{opacity:.8}50%{opacity:.4}}
+.neb1{width:320px;height:220px;top:30px;left:80px;background:rgba(80,0,180,.15);}
+.neb2{width:280px;height:200px;top:50px;right:60px;background:rgba(0,80,220,.12);}
+.neb3{width:240px;height:160px;bottom:80px;left:280px;background:rgba(0,180,140,.07);}
+.oz-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 35%,rgba(0,5,20,.75) 100%);}
+.oz-scanline{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.08) 3px,rgba(0,0,0,.08) 4px);pointer-events:none;}
+#stars-c,#streams-c{position:absolute;inset:0;pointer-events:none;}
+.data-stream{position:absolute;font-family:'Share Tech Mono',monospace;font-size:8px;pointer-events:none;animation:streamFall linear infinite;}
+@keyframes streamFall{from{transform:translateY(-20px);opacity:.35}to{transform:translateY(610px);opacity:0}}
+
+/* ═══ CHARACTERS ═══ */
+.character{position:absolute;bottom:195px;transition:opacity .7s ease;}
+#char-kenji{left:320px;}
+#char-natsuki{left:460px;}
+#char-kazuma{left:185px;}
+
+/* ═══ DIALOGUE ═══ */
+#dbox{position:absolute;bottom:0;left:0;right:0;height:175px;cursor:pointer;user-select:none;z-index:10;display:none;}
+.dbox-bg{position:absolute;inset:0;background:linear-gradient(180deg,rgba(2,8,30,.88),rgba(1,4,18,.97));border-top:1px solid rgba(100,180,255,.25);}
+.dbox-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#5ee6ff,#a070ff,#5ee6ff,transparent);}
+.dbox-inner{position:absolute;inset:0;padding:14px 26px;}
+#spk-wrap{display:flex;align-items:center;gap:10px;margin-bottom:8px;}
+#spk-name{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;padding:4px 14px;border-radius:2px;}
+#spk-name.narrator{color:#a0c8ff;border:1px solid rgba(160,200,255,.3);background:rgba(160,200,255,.06);}
+#spk-name.kenji{color:#5ee6ff;border:1px solid rgba(94,230,255,.4);background:rgba(94,230,255,.08);}
+#spk-name.natsuki{color:#ff7aaa;border:1px solid rgba(255,122,170,.4);background:rgba(255,122,170,.08);}
+#spk-name.kazuma{color:#ff6a30;border:1px solid rgba(255,106,48,.4);background:rgba(255,106,48,.08);}
+#spk-name.system{color:#a070ff;border:1px solid rgba(160,112,255,.4);background:rgba(160,112,255,.08);}
+#spk-name.iason{color:#44ffaa;border:1px solid rgba(68,255,170,.4);background:rgba(68,255,170,.08);}
+.spk-dot{width:6px;height:6px;border-radius:50%;animation:sDot 1.5s ease-in-out infinite;flex-shrink:0;}
+@keyframes sDot{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.3;transform:scale(.6)}}
+#dlg-text{font-size:14px;line-height:1.85;color:#d8e8ff;min-height:52px;}
+#dlg-hint{position:absolute;bottom:14px;right:26px;font-size:9px;color:rgba(150,180,255,.4);font-family:'Orbitron',sans-serif;letter-spacing:2px;animation:hBlink 1.4s ease-in-out infinite;}
+@keyframes hBlink{0%,100%{opacity:.4}50%{opacity:.9}}
+#choices{position:absolute;bottom:180px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 60px;opacity:0;pointer-events:none;transition:opacity .4s;z-index:11;}
+#choices.show{opacity:1;pointer-events:all;}
+.choice-btn{width:100%;max-width:680px;padding:11px 22px;background:linear-gradient(135deg,rgba(0,20,70,.9),rgba(0,40,100,.85));border:1px solid rgba(94,230,255,.3);border-radius:4px;color:#c8e8ff;font-family:'Noto Sans JP',sans-serif;font-size:13px;text-align:left;cursor:pointer;transition:all .25s;position:relative;}
+.choice-btn::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#5ee6ff,#a070ff);opacity:0;transition:opacity .2s;}
+.choice-btn:hover{border-color:rgba(94,230,255,.7);transform:translateX(4px);}
+.choice-btn:hover::before{opacity:1;}
+.choice-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.4);letter-spacing:3px;margin-bottom:3px;}
+
+/* EMOTION */
+#emotion-badge{position:absolute;top:18px;left:50%;transform:translateX(-50%) translateY(-60px);background:linear-gradient(135deg,rgba(10,20,60,.95),rgba(5,10,40,.98));border:1px solid rgba(255,200,80,.3);border-radius:30px;padding:7px 20px;font-size:12px;color:#ffe080;transition:transform .4s cubic-bezier(.175,.885,.32,1.275);z-index:35;white-space:nowrap;}
+#emotion-badge.show{transform:translateX(-50%) translateY(0);}
+
+/* NOTIF */
+#notif{position:absolute;top:18px;right:18px;background:linear-gradient(135deg,rgba(0,10,40,.95),rgba(0,20,60,.98));border:1px solid rgba(255,40,80,.5);border-radius:6px;padding:14px 18px;width:260px;transform:translateX(320px);transition:transform .6s cubic-bezier(.175,.885,.32,1.275);z-index:30;box-shadow:0 0 30px rgba(255,40,80,.12);}
+#notif.show{transform:translateX(0);}
+.notif-bar{height:2px;background:linear-gradient(90deg,#ff0066,#ff4400);border-radius:1px;margin-bottom:10px;animation:nBar 1.5s ease-in-out infinite;}
+@keyframes nBar{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* ═══ EXPLORATION ═══ */
+#explore-overlay{position:absolute;inset:0;z-index:15;opacity:0;pointer-events:none;transition:opacity .6s;}
+#explore-overlay.active{opacity:1;pointer-events:all;}
+.exp-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 45%,#050f30,#010509);}
+.exp-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,150,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.1) 1px,transparent 1px);background-size:50px 50px;transform:perspective(600px) rotateX(55deg);transform-origin:bottom center;}
+.exp-scan{position:absolute;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,.06) 3px,rgba(0,0,0,.06) 4px);pointer-events:none;}
+.exp-vignette{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 50%,transparent 30%,rgba(0,5,20,.85) 100%);}
+#exp-header{position:absolute;top:14px;left:0;right:0;text-align:center;z-index:1;}
+#exp-header h3{font-family:'Orbitron',sans-serif;font-size:13px;color:#5ee6ff;letter-spacing:3px;text-shadow:0 0 15px rgba(94,230,255,.5);}
+#exp-header p{font-size:11px;color:rgba(160,190,255,.5);margin-top:4px;font-family:'Share Tech Mono',monospace;letter-spacing:1px;}
+#exp-nodes{position:absolute;inset:0;}
+.exp-node{position:absolute;cursor:pointer;transform:translate(-50%,-50%);transition:all .3s;}
+.node-ring{width:48px;height:48px;border-radius:50%;border:2px solid;position:relative;display:flex;align-items:center;justify-content:center;animation:nodeFloat 3s ease-in-out infinite;}
+@keyframes nodeFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}
+.node-ring::before{content:'';position:absolute;inset:-6px;border-radius:50%;border:1px solid;opacity:.3;animation:nodePing 2s ease-out infinite;}
+@keyframes nodePing{0%{transform:scale(1);opacity:.5}100%{transform:scale(1.6);opacity:0}}
+.node-icon{font-size:18px;}
+.node-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;white-space:nowrap;}
+.exp-node.found .node-ring{animation:none;opacity:.4;}
+.exp-node.found .node-ring::before{display:none;}
+#node-reveal{position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(180deg,rgba(2,5,20,.92),rgba(1,3,14,.98));border-top:1px solid rgba(94,230,255,.2);padding:14px 28px;transform:translateY(160px);transition:transform .5s cubic-bezier(.175,.885,.32,1.275);}
+#node-reveal.show{transform:translateY(0);}
+.nr-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#5ee6ff,#a070ff,transparent);}
+.nr-tag{font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px;margin-bottom:6px;}
+.nr-title{font-family:'Share Tech Mono',monospace;font-size:13px;color:#aee6ff;margin-bottom:6px;}
+.nr-body{font-size:13px;color:#d0e4ff;line-height:1.7;}
+#nr-continue{position:absolute;bottom:14px;right:24px;font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.5);letter-spacing:2px;cursor:pointer;animation:hBlink 1.4s ease-in-out infinite;}
+#exp-progress{position:absolute;top:60px;right:20px;font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.4);letter-spacing:2px;text-align:right;}
+#exp-progress span{display:block;font-size:16px;font-weight:700;color:#5ee6ff;text-shadow:0 0 10px rgba(94,230,255,.5);}
+#exp-done-btn{position:absolute;top:60px;left:50%;transform:translateX(-50%);padding:10px 32px;background:transparent;border:1px solid rgba(94,230,255,.4);color:#5ee6ff;font-family:'Orbitron',sans-serif;font-size:10px;letter-spacing:3px;cursor:pointer;border-radius:3px;display:none;transition:all .3s;z-index:5;}
+#exp-done-btn:hover{background:rgba(94,230,255,.1);}
+
+/* ═══ RHYTHM ═══ */
+#rhythm-overlay{position:absolute;inset:0;z-index:16;opacity:0;pointer-events:none;transition:opacity .6s;}
+#rhythm-overlay.active{opacity:1;pointer-events:all;}
+.rhy-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 30%,#0a0520,#020208);}
+.rhy-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(160,0,255,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(160,0,255,.08) 1px,transparent 1px);background-size:40px 40px;animation:gridMove 4s linear infinite;}
+#rhy-header{position:absolute;top:14px;left:0;right:0;text-align:center;z-index:2;}
+#rhy-header h3{font-family:'Orbitron',sans-serif;font-size:13px;letter-spacing:3px;background:linear-gradient(135deg,#a070ff,#ff6a30);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+#rhy-header p{font-size:11px;color:rgba(160,150,255,.5);font-family:'Share Tech Mono',monospace;margin-top:4px;letter-spacing:1px;}
+#rhy-nodes-row{position:absolute;top:50%;left:50%;transform:translate(-50%,-60%);display:flex;gap:28px;z-index:2;}
+.rhy-node{width:72px;height:72px;border-radius:50%;border:3px solid;position:relative;cursor:pointer;transition:transform .1s;display:flex;align-items:center;justify-content:center;}
+.rhy-node .rn-icon{font-size:22px;}
+.rhy-node .rn-label{position:absolute;bottom:-22px;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:7px;letter-spacing:2px;white-space:nowrap;}
+.rhy-node .rn-ring{position:absolute;inset:-10px;border-radius:50%;border:2px solid;opacity:0;animation:rhyPing 1.5s ease-out infinite;}
+@keyframes rhyPing{0%{transform:scale(1);opacity:.7}100%{transform:scale(1.5);opacity:0}}
+.rhy-node.stable{border-color:#00ff88;box-shadow:0 0 20px rgba(0,255,136,.3);}
+.rhy-node.stable .rn-ring{border-color:#00ff88;}
+.rhy-node.corrupt{border-color:#ff4466;box-shadow:0 0 20px rgba(255,40,80,.4);animation:corruptShake .4s ease-in-out infinite;}
+@keyframes corruptShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+.rhy-node.pulsing{border-color:#ffcc00;box-shadow:0 0 30px rgba(255,200,0,.5);animation:nodePulse .6s ease-in-out infinite;}
+@keyframes nodePulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+.rhy-node.hit{transform:scale(.92);}
+.rhy-node.done{border-color:#5ee6ff;opacity:.6;pointer-events:none;}
+#pulse-ring{position:absolute;top:50%;left:50%;width:120px;height:120px;border-radius:50%;border:2px solid rgba(160,112,255,.5);transform:translate(-50%,-80%) scale(0);pointer-events:none;z-index:1;}
+#pulse-ring.fire{animation:pulseExpand .8s ease-out forwards;}
+@keyframes pulseExpand{0%{transform:translate(-50%,-80%) scale(0);opacity:.8}100%{transform:translate(-50%,-80%) scale(4);opacity:0}}
+#timing-bar-wrap{position:absolute;bottom:175px;left:50%;transform:translateX(-50%);width:360px;z-index:2;}
+#timing-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(160,150,255,.5);letter-spacing:3px;text-align:center;margin-bottom:6px;}
+#timing-bar{width:100%;height:12px;background:rgba(40,0,80,.5);border-radius:6px;overflow:hidden;border:1px solid rgba(160,112,255,.3);position:relative;}
+#timing-fill{height:100%;border-radius:6px;transition:width .05s linear;background:linear-gradient(90deg,#5ee6ff,#a070ff,#ff6a30);}
+#rhy-feedback{position:absolute;top:38%;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;pointer-events:none;opacity:0;z-index:3;transition:opacity .15s;text-shadow:0 0 20px currentColor;}
+.fb-perfect{color:#ffcc00;}
+.fb-good{color:#5ee6ff;}
+.fb-miss{color:#ff4466;}
+#rhy-hud{position:absolute;top:60px;left:0;right:0;display:flex;justify-content:space-between;padding:0 40px;z-index:2;}
+.hud-block{text-align:center;}
+.hud-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(160,150,255,.4);letter-spacing:3px;margin-bottom:4px;}
+.hud-val{font-family:'Orbitron',sans-serif;font-size:18px;font-weight:700;color:#a070ff;text-shadow:0 0 10px rgba(160,112,255,.5);}
+#rhy-health-bar{width:160px;height:8px;background:rgba(255,40,80,.15);border-radius:4px;overflow:hidden;border:1px solid rgba(255,40,80,.2);}
+#rhy-health-fill{height:100%;background:linear-gradient(90deg,#ff4466,#ff8888);border-radius:4px;transition:width .3s;}
+
+/* ═══ SPLIT SCREEN ═══ */
+#split-screen{position:absolute;inset:0;z-index:20;display:flex;opacity:0;pointer-events:none;transition:opacity .8s;}
+#split-screen.show{opacity:1;pointer-events:all;}
+.split-real{flex:0 0 42%;background:linear-gradient(180deg,#0a0510,#050208);border-right:1px solid rgba(255,100,50,.3);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.split-oz{flex:1;background:radial-gradient(ellipse at 50% 40%,#0a1840,#020810);position:relative;overflow:hidden;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.split-label{position:absolute;top:12px;left:50%;transform:translateX(-50%);font-family:'Orbitron',sans-serif;font-size:8px;letter-spacing:4px;padding:4px 12px;border:1px solid;border-radius:2px;}
+.split-label.real{color:rgba(255,120,50,.6);border-color:rgba(255,120,50,.3);}
+.split-label.oz{color:rgba(94,230,255,.6);border-color:rgba(94,230,255,.3);}
+.split-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(0,150,255,.1) 1px,transparent 1px),linear-gradient(90deg,rgba(0,150,255,.1) 1px,transparent 1px);background-size:30px 30px;animation:gridMove 6s linear infinite;}
+.split-vignette{position:absolute;inset:0;background:radial-gradient(ellipse,transparent 40%,rgba(0,5,20,.8) 100%);}
+.kaz-real-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;z-index:1;}
+.kaz-real-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(255,120,50,.5);letter-spacing:3px;}
+.kaz-phone-glow{position:absolute;width:40px;height:60px;background:rgba(0,150,255,.2);border-radius:4px;filter:blur(8px);animation:phoneGlow 2s ease-in-out infinite;}
+@keyframes phoneGlow{0%,100%{opacity:.5}50%{opacity:1}}
+.kazma-wrap{z-index:1;position:relative;}
+.kazma-aura{position:absolute;inset:-20px;border-radius:50%;background:radial-gradient(circle,rgba(255,100,50,.15),transparent 70%);animation:auraPulse 2s ease-in-out infinite;}
+@keyframes auraPulse{0%,100%{transform:scale(1);opacity:.6}50%{transform:scale(1.1);opacity:1}}
+.kazma-combat{animation:kazmaReady 3s ease-in-out infinite;}
+@keyframes kazmaReady{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+#split-dbox{position:absolute;bottom:0;left:0;right:0;height:150px;background:linear-gradient(180deg,rgba(2,5,20,.9),rgba(1,3,14,.97));border-top:1px solid rgba(100,180,255,.2);padding:12px 24px;cursor:pointer;}
+.split-dbox-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff6a30,#5ee6ff,#ff6a30,transparent);}
+#split-speaker{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;padding:3px 12px;border-radius:2px;display:inline-block;margin-bottom:8px;}
+#split-speaker.kazuma{color:#ff6a30;border:1px solid rgba(255,106,48,.4);background:rgba(255,106,48,.08);}
+#split-speaker.kazma{color:#ff4400;border:1px solid rgba(255,68,0,.6);background:rgba(255,68,0,.12);text-shadow:0 0 10px rgba(255,68,0,.6);}
+#split-speaker.system{color:#a070ff;border:1px solid rgba(160,112,255,.4);background:rgba(160,112,255,.08);}
+#split-text{font-size:13px;line-height:1.8;color:#d8e8ff;max-width:860px;}
+#split-hint{position:absolute;bottom:12px;right:22px;font-size:9px;color:rgba(150,180,255,.4);font-family:'Orbitron',sans-serif;letter-spacing:2px;animation:hBlink 1.4s ease-in-out infinite;}
+
+/* ═══ LOVE MACHINE ═══ */
+#lm-overlay{position:absolute;inset:0;z-index:17;opacity:0;pointer-events:none;transition:opacity 1s;}
+#lm-overlay.active{opacity:1;pointer-events:all;}
+.lm-bg{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#100010,#030003);}
+.lm-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(180,0,100,.06) 1px,transparent 1px),linear-gradient(90deg,rgba(180,0,100,.06) 1px,transparent 1px);background-size:35px 35px;animation:gridMove 3s linear infinite;}
+#lm-canvas-wrap{position:absolute;top:50px;left:50%;transform:translateX(-50%);z-index:2;}
+#lm-dbox{position:absolute;bottom:0;left:0;right:0;height:160px;background:linear-gradient(180deg,rgba(20,0,20,.92),rgba(5,0,10,.98));border-top:1px solid rgba(180,0,100,.3);padding:14px 26px;cursor:pointer;}
+.lm-dbox-accent{position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,#ff0066,#ff4400,#ff0066,transparent);}
+#lm-speaker{font-family:'Orbitron',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;padding:3px 12px;border-radius:2px;display:inline-block;margin-bottom:8px;}
+#lm-speaker.lm{color:#ff0066;border:1px solid rgba(255,0,102,.5);background:rgba(255,0,102,.08);text-shadow:0 0 15px rgba(255,0,102,.7);}
+#lm-speaker.kenji{color:#5ee6ff;border:1px solid rgba(94,230,255,.4);background:rgba(94,230,255,.08);}
+#lm-speaker.kazma{color:#ff4400;border:1px solid rgba(255,68,0,.5);background:rgba(255,68,0,.1);text-shadow:0 0 12px rgba(255,68,0,.6);}
+#lm-speaker.kazuma{color:#ff6a30;border:1px solid rgba(255,106,48,.4);background:rgba(255,106,48,.08);}
+#lm-speaker.natsuki{color:#ff7aaa;border:1px solid rgba(255,122,170,.4);background:rgba(255,122,170,.08);}
+#lm-text{font-size:13.5px;line-height:1.85;color:#e8d8ff;max-width:840px;min-height:50px;}
+#lm-hint{position:absolute;bottom:12px;right:22px;font-size:9px;color:rgba(200,150,255,.4);font-family:'Orbitron',sans-serif;letter-spacing:2px;animation:hBlink 1.4s ease-in-out infinite;}
+#lm-choices{position:absolute;bottom:165px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:8px;padding:0 60px;opacity:0;pointer-events:none;transition:opacity .4s;}
+#lm-choices.show{opacity:1;pointer-events:all;}
+.lm-choice{width:100%;max-width:680px;padding:11px 22px;background:linear-gradient(135deg,rgba(40,0,40,.9),rgba(60,0,60,.85));border:1px solid rgba(180,0,100,.3);border-radius:4px;color:#e8d0ff;font-family:'Noto Sans JP',sans-serif;font-size:13px;text-align:left;cursor:pointer;transition:all .25s;}
+.lm-choice:hover{border-color:rgba(255,0,100,.6);background:rgba(80,0,80,.9);transform:translateX(4px);}
+.lm-choice-label{font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(255,0,100,.4);letter-spacing:3px;margin-bottom:3px;}
+
+/* CHAPTER TITLE */
+#chapter-title{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:100;background:radial-gradient(ellipse at 50% 50%,#0a0520,#020208);}
+#title-stars{position:absolute;inset:0;}
+.t-line{width:200px;height:1px;background:linear-gradient(90deg,transparent,rgba(94,230,255,.6),transparent);margin:16px auto;}
+.pre-title{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(94,230,255,.45);letter-spacing:8px;margin-bottom:6px;}
+.game-title{font-family:'Orbitron',sans-serif;font-size:22px;font-weight:900;letter-spacing:3px;background:linear-gradient(135deg,#a070ff,#ff6a30,#5ee6ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.game-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(160,150,255,.4);letter-spacing:4px;margin-bottom:28px;}
+.ch-num{font-family:'Orbitron',sans-serif;font-size:54px;font-weight:900;color:transparent;-webkit-text-stroke:1px rgba(160,112,255,.35);line-height:1;}
+.ch-title{font-size:28px;font-weight:700;color:#fff;letter-spacing:4px;}
+.ch-sub{font-family:'Share Tech Mono',monospace;font-size:11px;color:rgba(200,180,255,.4);letter-spacing:3px;margin-top:6px;}
+.start-btn{margin-top:40px;padding:13px 48px;background:transparent;border:1px solid rgba(160,112,255,.5);color:#a070ff;font-family:'Orbitron',sans-serif;font-size:11px;letter-spacing:5px;cursor:pointer;transition:all .3s;position:relative;z-index:101;}
+.start-btn:hover{background:rgba(160,112,255,.08);box-shadow:0 0 30px rgba(160,112,255,.2);}
+
+#scene-flash{position:absolute;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:55;transition:opacity .25s;}
+
+/* END CARD */
+#end-card{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 40%,#0a051e,#020208);z-index:58;display:flex;flex-direction:column;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 2s;}
+#end-card.show{opacity:1;pointer-events:all;}
+.ec-label{font-family:'Orbitron',sans-serif;font-size:9px;color:rgba(160,112,255,.4);letter-spacing:6px;}
+.ec-line{width:160px;height:1px;background:linear-gradient(90deg,transparent,rgba(160,112,255,.4),transparent);margin:14px auto;}
+.ec-title{font-family:'Orbitron',sans-serif;font-size:17px;font-weight:700;background:linear-gradient(135deg,#a070ff,#5ee6ff);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:3px;}
+.ec-text{color:rgba(190,210,255,.65);font-size:13px;line-height:1.9;text-align:center;max-width:540px;margin:14px 0;}
+.ec-tbc{font-family:'Orbitron',sans-serif;font-size:12px;color:#ff9a5c;letter-spacing:8px;}
+.ec-bday{font-size:24px;color:#fff;margin-top:26px;animation:bdPulse 2s ease-in-out infinite;}
+@keyframes bdPulse{0%,100%{text-shadow:0 0 40px rgba(255,255,255,.4)}50%{text-shadow:0 0 60px rgba(255,255,255,.8),0 0 100px rgba(160,112,255,.4)}}
+.ec-sub{color:rgba(180,200,255,.35);font-size:12px;margin-top:8px;letter-spacing:2px;}
+</style>
+</head>
+<body>
+<div id="game">
+
+<!-- OZ BG -->
+<div id="bg-oz">
+  <div class="oz-nebula neb1"></div><div class="oz-nebula neb2"></div><div class="oz-nebula neb3"></div>
+  <div class="oz-grid-far"></div><div class="oz-grid-top"></div>
+  <div id="stars-c"></div><div id="streams-c"></div>
+  <div class="oz-vignette"></div><div class="oz-scanline"></div>
+</div>
+
+<!-- CHARACTERS -->
+<div class="character" id="char-kenji" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none"><ellipse cx="44" cy="170" rx="28" ry="5" fill="rgba(0,0,0,0.25)"/><rect x="22" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><rect x="46" y="120" width="18" height="50" rx="4" fill="#2a4a9a"/><ellipse cx="31" cy="170" rx="12" ry="6" fill="#1a1a2a"/><ellipse cx="55" cy="170" rx="12" ry="6" fill="#1a1a2a"/><rect x="16" y="56" width="56" height="68" rx="6" fill="#3a6ab8"/><path d="M36 56 L44 70 L52 56" fill="#fff" opacity="0.9"/><rect x="4" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><rect x="70" y="60" width="14" height="48" rx="6" fill="#3a6ab8"/><ellipse cx="11" cy="110" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="77" cy="110" rx="8" ry="7" fill="#f5c9a0"/><rect x="18" y="96" width="52" height="30" rx="3" fill="#181828"/><rect x="21" y="99" width="46" height="24" rx="2" fill="#1a3a6a"/><rect x="23" y="101" width="42" height="20" rx="1" fill="#0d2448"/><defs><linearGradient id="sg2"><stop offset="0%" stop-color="#00aaff" stop-opacity="0.5"/><stop offset="100%" stop-color="#0044aa" stop-opacity="0.1"/></linearGradient></defs><rect x="23" y="101" width="42" height="20" rx="1" fill="url(#sg2)" opacity="0.8"/><rect x="36" y="46" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="27" ry="28" fill="#f5c9a0"/><path d="M17 28 C17 10 28 4 44 4 C60 4 71 10 71 28 L68 22 C65 12 56 8 44 8 C32 8 23 12 20 22 Z" fill="#1a1a2e"/><rect x="17" y="26" width="6" height="14" rx="3" fill="#1a1a2e"/><rect x="65" y="26" width="6" height="14" rx="3" fill="#1a1a2e"/><ellipse cx="17" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="71" cy="34" rx="5" ry="6" fill="#f0b898"/><rect x="23" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><rect x="47" y="28" width="18" height="13" rx="3" fill="none" stroke="#2a2a3a" stroke-width="2.5"/><line x1="41" y1="34" x2="47" y2="34" stroke="#2a2a3a" stroke-width="2"/><circle cx="32" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="56" cy="35" r="3.5" fill="#2a1a0a"/><circle cx="33" cy="34" r="1" fill="white"/><circle cx="57" cy="34" r="1" fill="white"/><path d="M38 44 Q44 48 50 44" stroke="#c4845a" stroke-width="1.5" fill="none" stroke-linecap="round"/></svg>
+</div>
+<div class="character" id="char-natsuki" style="opacity:0;">
+<svg width="88" height="175" viewBox="0 0 88 175" fill="none"><ellipse cx="44" cy="170" rx="26" ry="5" fill="rgba(0,0,0,0.2)"/><rect x="24" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/><rect x="50" y="130" width="14" height="38" rx="3" fill="#f5c9a0"/><ellipse cx="31" cy="168" rx="11" ry="5" fill="#c83060"/><ellipse cx="57" cy="168" rx="11" ry="5" fill="#c83060"/><path d="M14 108 Q20 148 44 148 Q68 148 74 108 Z" fill="#c83060"/><rect x="20" y="58" width="48" height="52" rx="6" fill="#e8407a"/><rect x="6" y="62" width="16" height="44" rx="6" fill="#e8407a"/><rect x="66" y="62" width="16" height="44" rx="6" fill="#e8407a"/><ellipse cx="14" cy="108" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="74" cy="108" rx="8" ry="7" fill="#f5c9a0"/><rect x="36" y="48" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="44" cy="34" rx="26" ry="27" fill="#f5c9a0"/><ellipse cx="44" cy="28" rx="28" ry="26" fill="#c8602a"/><path d="M16 28 C16 8 28 2 44 2 C60 2 72 8 72 28" fill="#e07030"/><ellipse cx="18" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="70" cy="34" rx="5" ry="6" fill="#f0b898"/><ellipse cx="33" cy="35" rx="5" ry="6" fill="#3a1060"/><ellipse cx="55" cy="35" rx="5" ry="6" fill="#3a1060"/><circle cx="36" cy="31" r="2" fill="white" opacity="0.9"/><circle cx="58" cy="31" r="2" fill="white" opacity="0.9"/><path d="M37 44 Q44 50 51 44" stroke="#c4645a" stroke-width="2" fill="none" stroke-linecap="round"/></svg>
+</div>
+<div class="character" id="char-kazuma" style="opacity:0;">
+<svg width="80" height="165" viewBox="0 0 80 165" fill="none"><ellipse cx="40" cy="160" rx="24" ry="5" fill="rgba(0,0,0,0.25)"/><rect x="18" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><rect x="44" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><ellipse cx="26" cy="158" rx="11" ry="5" fill="#0a0a1a"/><ellipse cx="52" cy="158" rx="11" ry="5" fill="#0a0a1a"/><rect x="12" y="54" width="56" height="62" rx="8" fill="#1a1a2e"/><rect x="22" y="90" width="36" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/><path d="M28 54 L40 68 L52 54" fill="#141428" opacity="0.8"/><rect x="0" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><rect x="66" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><ellipse cx="7" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="73" cy="106" rx="8" ry="7" fill="#f5c9a0"/><rect x="68" y="94" width="10" height="18" rx="2" fill="#0a0a18" stroke="rgba(94,230,255,0.4)" stroke-width="1"/><rect x="69" y="96" width="8" height="14" rx="1" fill="rgba(0,100,200,0.6)"/><rect x="32" y="44" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="40" cy="30" rx="25" ry="26" fill="#f5c9a0"/><path d="M15 26 C15 8 26 2 40 2 C54 2 65 8 65 26 L62 20 C58 10 50 6 40 6 C30 6 22 10 18 20 Z" fill="#8a1a1a"/><path d="M25 8 L22 0 L30 8" fill="#aa2222"/><path d="M38 4 L40 -2 L42 4" fill="#aa2222"/><path d="M52 8 L58 0 L50 8" fill="#aa2222"/><ellipse cx="15" cy="30" rx="5" ry="6" fill="#f0b898"/><ellipse cx="65" cy="30" rx="5" ry="6" fill="#f0b898"/><path d="M22 28 L32 26 L32 34 L22 34 Z" fill="#1a0808"/><path d="M48 28 L58 26 L58 34 L48 34 Z" fill="#1a0808"/><ellipse cx="27" cy="30" rx="4" ry="4" fill="#8a2020"/><ellipse cx="53" cy="30" rx="4" ry="4" fill="#8a2020"/><circle cx="29" cy="28" r="1.5" fill="white" opacity="0.8"/><circle cx="55" cy="28" r="1.5" fill="white" opacity="0.8"/><path d="M20 24 L34 22" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M46 22 L60 24" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M34 40 Q40 43 46 40" stroke="#c4645a" stroke-width="1.5" fill="none" stroke-linecap="round"/><path d="M15 22 C15 8 25 2 40 2 C55 2 65 8 65 22" stroke="#2a2a4a" stroke-width="5" fill="none"/><rect x="11" y="20" width="8" height="12" rx="3" fill="#2a2a4a" stroke="#3a3a5a" stroke-width="1"/><rect x="61" y="20" width="8" height="12" rx="3" fill="#2a2a4a" stroke="#3a3a5a" stroke-width="1"/></svg>
+</div>
+
+<!-- NOTIF -->
+<div id="notif">
+  <div class="notif-bar"></div>
+  <div style="font-family:'Orbitron',sans-serif;font-size:8px;color:#ff4466;letter-spacing:3px;margin-bottom:6px;">⚠ CRITICAL ANOMALY</div>
+  <div style="font-family:'Share Tech Mono',monospace;font-size:12px;color:#ff6688;margin-bottom:8px;">Dormant Signal Reactivating</div>
+  <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,100,150,.5);margin-top:3px;"><span>SIGNATURE</span><span style="color:rgba(255,150,180,.7)">LM-FRAG-∅</span></div>
+  <div style="display:flex;justify-content:space-between;font-family:'Share Tech Mono',monospace;font-size:9px;color:rgba(255,100,150,.5);margin-top:3px;"><span>STATUS</span><span style="color:#ff4466">WAKING ██▒▒▒</span></div>
+</div>
+
+<div id="emotion-badge">✨</div>
+<div id="scene-flash"></div>
+
+<!-- CHOICES -->
+<div id="choices"></div>
+
+<!-- EXPLORATION -->
+<div id="explore-overlay">
+  <div class="exp-bg"></div><div class="exp-grid"></div><div class="exp-scan"></div><div class="exp-vignette"></div>
+  <div id="exp-header"><h3>⟨ OZ DEEP SCAN — TRACE ALI'S HIDDEN NODES ⟩</h3><p>Click the glowing data nodes to recover what Ali left behind</p></div>
+  <div id="exp-progress"><div style="font-family:'Orbitron',sans-serif;font-size:8px;color:rgba(94,230,255,.4);letter-spacing:3px;">RECOVERED</div><span id="exp-count">0 / 5</span></div>
+  <div id="exp-nodes"></div>
+  <div id="node-reveal">
+    <div class="nr-accent"></div>
+    <div class="nr-tag" id="nr-tag">NODE DATA</div>
+    <div class="nr-title" id="nr-title">—</div>
+    <div class="nr-body" id="nr-body">—</div>
+    <div id="nr-continue">▼ CLICK TO CONTINUE SCAN</div>
+  </div>
+  <button id="exp-done-btn" onclick="endExplore()">▶ PROCEED TO NEXT PHASE</button>
+</div>
+
+<!-- RHYTHM -->
+<div id="rhythm-overlay">
+  <div class="rhy-bg"></div><div class="rhy-grid"></div>
+  <div id="rhy-header"><h3>⟨ NODE STABILISATION PROTOCOL ⟩</h3><p>Click each node exactly when it pulses — King Kazma is holding the line</p></div>
+  <div id="rhy-hud">
+    <div class="hud-block"><div class="hud-label">SCORE</div><div class="hud-val" id="rhy-score">0</div></div>
+    <div class="hud-block"><div class="hud-label">STABILITY</div><div id="rhy-health-bar"><div id="rhy-health-fill" style="width:100%"></div></div></div>
+    <div class="hud-block"><div class="hud-label">NODES LEFT</div><div class="hud-val" id="rhy-left">5</div></div>
+  </div>
+  <div id="rhy-nodes-row"></div>
+  <div id="pulse-ring"></div>
+  <div id="timing-bar-wrap">
+    <div id="timing-label">PULSE WINDOW — HIT AT PEAK</div>
+    <div id="timing-bar"><div id="timing-fill" style="width:0%"></div></div>
+  </div>
+  <div id="rhy-feedback"></div>
+</div>
+
+<!-- SPLIT SCREEN -->
+<div id="split-screen">
+  <div class="split-real">
+    <div class="split-label real">REAL WORLD — UEDA</div>
+    <div class="split-grid" style="opacity:.3"></div>
+    <div class="kaz-real-wrap">
+      <div class="kaz-real-label">KAZUMA IKEZAWA</div>
+      <div style="position:relative">
+        <div class="kaz-phone-glow"></div>
+        <svg width="80" height="165" viewBox="0 0 80 165" fill="none"><ellipse cx="40" cy="160" rx="24" ry="5" fill="rgba(0,0,0,0.3)"/><rect x="18" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><rect x="44" y="112" width="16" height="46" rx="4" fill="#1a1a3a"/><rect x="12" y="54" width="56" height="62" rx="8" fill="#1a1a2e"/><rect x="22" y="90" width="36" height="22" rx="4" fill="rgba(255,255,255,0.05)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/><path d="M28 54 L40 68 L52 54" fill="#141428" opacity="0.8"/><rect x="0" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><rect x="66" y="58" width="14" height="46" rx="6" fill="#1a1a2e"/><ellipse cx="7" cy="106" rx="8" ry="7" fill="#f5c9a0"/><ellipse cx="73" cy="106" rx="8" ry="7" fill="#f5c9a0"/><rect x="60" y="88" width="14" height="22" rx="3" fill="#0a0a18" stroke="rgba(94,230,255,0.5)" stroke-width="1.5"/><rect x="62" y="91" width="10" height="16" rx="1" fill="rgba(0,120,255,0.7)"/><rect x="32" y="44" width="16" height="14" rx="4" fill="#f5c9a0"/><ellipse cx="40" cy="30" rx="25" ry="26" fill="#f5c9a0"/><path d="M15 26 C15 8 26 2 40 2 C54 2 65 8 65 26 L62 20 C58 10 50 6 40 6 C30 6 22 10 18 20 Z" fill="#8a1a1a"/><path d="M25 8 L22 0 L30 8" fill="#aa2222"/><path d="M38 4 L40-2 L42 4" fill="#aa2222"/><path d="M52 8 L58 0 L50 8" fill="#aa2222"/><ellipse cx="27" cy="30" rx="4" ry="4" fill="#8a2020"/><ellipse cx="53" cy="30" rx="4" ry="4" fill="#8a2020"/><circle cx="29" cy="28" r="1.5" fill="white" opacity="0.8"/><circle cx="55" cy="28" r="1.5" fill="white" opacity="0.8"/><path d="M20 24 L34 22" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M46 22 L60 24" stroke="#5a0808" stroke-width="2.5" stroke-linecap="round"/><path d="M15 22 C15 8 25 2 40 2 C55 2 65 8 65 22" stroke="#2a2a4a" stroke-width="5" fill="none"/><rect x="11" y="20" width="8" height="12" rx="3" fill="#2a2a4a"/><rect x="61" y="20" width="8" height="12" rx="3" fill="#2a2a4a"/></svg>
+      </div>
+    </div>
+  </div>
+  <div class="split-oz">
+    <div class="split-label oz">OZ — DIGITAL SPACE</div>
+    <div class="split-grid"></div><div class="split-vignette"></div>
+    <div class="kazma-wrap">
+      <div class="kazma-aura"></div>
+      <svg class="kazma-combat" width="110" height="200" viewBox="0 0 110 200" fill="none">
+        <ellipse cx="55" cy="196" rx="32" ry="6" fill="rgba(255,100,0,0.2)"/>
+        <rect x="28" y="130" width="20" height="60" rx="5" fill="#f0f0f0" transform="rotate(-8,38,130)"/>
+        <rect x="58" y="130" width="20" height="60" rx="5" fill="#f0f0f0" transform="rotate(5,68,130)"/>
+        <ellipse cx="34" cy="188" rx="14" ry="7" fill="#e8e0f0"/>
+        <ellipse cx="68" cy="188" rx="14" ry="7" fill="#e8e0f0"/>
+        <rect x="22" y="174" width="24" height="8" rx="4" fill="#fff" opacity=".6"/>
+        <rect x="56" y="174" width="24" height="8" rx="4" fill="#fff" opacity=".6"/>
+        <rect x="22" y="68" width="66" height="68" rx="10" fill="#f8f0ff"/>
+        <rect x="28" y="74" width="54" height="56" rx="8" fill="#efe8ff"/>
+        <circle cx="55" cy="100" r="14" fill="none" stroke="rgba(255,100,50,.6)" stroke-width="2"/>
+        <circle cx="55" cy="100" r="8" fill="rgba(255,100,50,.2)"/>
+        <path d="M55 92 L58 100 L55 108 L52 100 Z" fill="rgba(255,100,50,.7)"/>
+        <ellipse cx="22" cy="78" rx="14" ry="10" fill="#e8e0f8" transform="rotate(-20,22,78)"/>
+        <ellipse cx="88" cy="78" rx="14" ry="10" fill="#e8e0f8" transform="rotate(20,88,78)"/>
+        <rect x="2" y="72" width="22" height="52" rx="8" fill="#f0e8ff" transform="rotate(-15,13,98)"/>
+        <rect x="86" y="68" width="22" height="52" rx="8" fill="#f0e8ff" transform="rotate(20,97,94)"/>
+        <ellipse cx="8" cy="124" rx="12" ry="10" fill="#ff6a30" transform="rotate(-15,8,124)"/>
+        <ellipse cx="102" cy="116" rx="12" ry="10" fill="#ff6a30" transform="rotate(20,102,116)"/>
+        <rect x="46" y="58" width="18" height="14" rx="5" fill="#f8f4ff"/>
+        <ellipse cx="55" cy="40" rx="28" ry="30" fill="#f8f4ff"/>
+        <path d="M38 14 C36 -6 26 -10 28 2 C30 12 36 18 38 14 Z" fill="#f8f4ff" stroke="#e0d8f0" stroke-width="1"/>
+        <path d="M72 14 C74 -6 84 -10 82 2 C80 12 74 18 72 14 Z" fill="#f8f4ff" stroke="#e0d8f0" stroke-width="1"/>
+        <path d="M38 12 C37 0 31 -4 32 4 C33 10 37 14 38 12 Z" fill="rgba(255,150,180,.5)"/>
+        <path d="M72 12 C73 0 79 -4 78 4 C77 10 73 14 72 12 Z" fill="rgba(255,150,180,.5)"/>
+        <ellipse cx="44" cy="40" rx="7" ry="7" fill="#ff3300"/>
+        <ellipse cx="66" cy="40" rx="7" ry="7" fill="#ff3300"/>
+        <ellipse cx="44" cy="40" rx="5" ry="5" fill="#cc1100"/>
+        <ellipse cx="66" cy="40" rx="5" ry="5" fill="#cc1100"/>
+        <circle cx="46" cy="38" r="2" fill="white" opacity=".8"/>
+        <circle cx="68" cy="38" r="2" fill="white" opacity=".8"/>
+        <path d="M37 32 L52 35" stroke="#cc1100" stroke-width="3" stroke-linecap="round"/>
+        <path d="M58 35 L73 32" stroke="#cc1100" stroke-width="3" stroke-linecap="round"/>
+        <ellipse cx="55" cy="46" rx="3" ry="2" fill="rgba(255,150,180,.6)"/>
+        <path d="M48 52 L62 52" stroke="#d0b8c0" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+  </div>
+  <div id="split-dbox" onclick="splitNext()">
+    <div class="split-dbox-accent"></div>
+    <div id="split-speaker" class="kazuma">KAZUMA</div>
+    <div id="split-text"></div>
+    <div id="split-hint">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- LOVE MACHINE -->
+<div id="lm-overlay">
+  <div class="lm-bg"></div><div class="lm-grid"></div>
+  <div id="lm-canvas-wrap"><canvas id="lm-canvas" width="300" height="200"></canvas></div>
+  <div id="lm-choices"></div>
+  <div id="lm-dbox" onclick="lmNext()">
+    <div class="lm-dbox-accent"></div>
+    <div id="lm-speaker" class="lm">LOVE MACHINE [FRAGMENT]</div>
+    <div id="lm-text"></div>
+    <div id="lm-hint">▼ CLICK TO CONTINUE</div>
+  </div>
+</div>
+
+<!-- DIALOGUE -->
+<div id="dbox" onclick="handleClick()">
+  <div class="dbox-bg"></div><div class="dbox-accent"></div>
+  <div class="dbox-inner">
+    <div id="spk-wrap"><div class="spk-dot" id="spk-dot"></div><div id="spk-name" class="narrator">NARRATOR</div></div>
+    <div id="dlg-text"></div>
+  </div>
+  <div id="dlg-hint">▼ CLICK TO CONTINUE</div>
+</div>
+
+<!-- CHAPTER TITLE -->
+<div id="chapter-title">
+  <div id="title-stars"></div>
+  <div class="pre-title">SUMMER WARS: THE BIRTHDAY PROTOCOL</div>
+  <div class="game-title">CHAPTER TWO</div>
+  <div class="game-sub">DIGITAL DISTORTION</div>
+  <div class="t-line"></div>
+  <div class="ch-num">02</div>
+  <div class="ch-title">THE OZ ANOMALY</div>
+  <div class="ch-sub">— DEEP INSIDE THE NETWORK —</div>
+  <button class="start-btn" onclick="startGame()">▶ &nbsp; BEGIN</button>
+</div>
+
+<!-- END CARD -->
+<div id="end-card">
+  <div class="ec-label">END OF CHAPTER TWO</div>
+  <div class="ec-line"></div>
+  <div class="ec-title">IASON IS THE TARGET</div>
+  <div class="ec-text">Ali built something extraordinary — not just in code, but in what it means. A Greek programmer named Iason has been quietly working inside Oz's foundations, fixing what others broke, asking for nothing in return. And his friend Ali noticed. Went all the way in. Built him a world.</div>
+  <div class="ec-text" style="color:rgba(255,100,80,0.6);font-size:12px;">The Love Machine fragment learned from watching Iason work. It knows who he is. And now, so do we.</div>
+  <div class="ec-tbc">— TO BE CONTINUED —</div>
+  <div class="ec-bday">🎉 Happy Birthday, Iason! 🎉</div>
+  <div class="ec-sub">The network knows your name. Now let's find what Ali built for you.</div>
+</div>
+
+<script>
+/* ══ SETUP ══ */
+const stC=document.getElementById('stars-c');
+for(let i=0;i<100;i++){const s=document.createElement('div');const sz=Math.random()*2.5+.5;const cols=['#fff','#aaddff','#ccaaff','#ffeeaa'];s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:${cols[i%4]};top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.7+.1};animation:tw${i%3} ${2+Math.random()*5}s ease-in-out infinite ${Math.random()*5}s;`;stC.appendChild(s);}
+document.head.insertAdjacentHTML('beforeend','<style>@keyframes tw0{0%,100%{opacity:.8}50%{opacity:.05}}@keyframes tw1{0%,100%{opacity:.5}40%{opacity:.1}}@keyframes tw2{0%,100%{opacity:.9}60%{opacity:.15}}</style>');
+const tsC=document.getElementById('title-stars');
+for(let i=0;i<60;i++){const s=document.createElement('div');const sz=Math.random()*2+.5;s.style.cssText=`position:absolute;width:${sz}px;height:${sz}px;border-radius:50%;background:white;top:${Math.random()*100}%;left:${Math.random()*100}%;opacity:${Math.random()*.5+.1};animation:tw0 ${3+Math.random()*4}s ease-in-out infinite ${Math.random()*4}s;`;tsC.appendChild(s);}
+const srC=document.getElementById('streams-c');
+const JP='アイウエオカキクサシスタチツナニヌ0123456789ABCDEF∞∑∆Ω';
+function spawnStream(){const d=document.createElement('div');d.className='data-stream';d.style.left=Math.random()*920+'px';d.style.top='-20px';d.style.color=Math.random()>.5?'rgba(94,230,255,.15)':'rgba(160,112,255,.12)';d.style.animationDuration=(8+Math.random()*8)+'s';let t='';for(let i=0;i<8;i++)t+=JP[Math.floor(Math.random()*JP.length)]+'\n';d.textContent=t;srC.appendChild(d);setTimeout(()=>d.remove(),16000);}
+setInterval(spawnStream,700);
+
+/* ══ SCENES ══ */
+const DOTCOLS={narrator:'#a0c8ff',kenji:'#5ee6ff',natsuki:'#ff7aaa',kazuma:'#ff6a30',system:'#a070ff',iason:'#44ffaa'};
+let scene=0,typing=false,tiInt=null;
+
+const S=[
+/* 0 */{sp:'NARRATOR',cls:'narrator',txt:'The Jinnouchi courtyard. The same dinner table. Three cold plates of curry. Three people who have quietly abandoned the family gathering to chase a signal inside the world\'s largest network.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 1 */{sp:'KENJI',cls:'kenji',txt:'I\'ve triangulated the node origin. Ali\'s hidden event space is somewhere in the central Oz architecture — deep layer seven. The same layer where the core security scaffolding runs.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 2 */{sp:'NATSUKI',cls:'natsuki',txt:'Deep layer seven. So Ali wasn\'t just using Oz — they were working inside its walls. That takes serious access. And serious dedication.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'🤔 That\'s not casual'},
+/* 3 */{sp:'KAZUMA',cls:'kazuma',txt:'I\'m going in. My avatar moves faster through those layers than either of you. Find the nodes Ali left — track the signal from your terminal, Kenji.',chars:{kenji:1,kazuma:1},emotion:'😤 King Kazma time'},
+/* 4 */{sp:'KENJI',cls:'kenji',txt:'Wait. Before you do — there\'s something else in the anomaly data. A secondary signal. Extremely faint. Buried so deep I almost missed it entirely.',chars:{kenji:1,kazuma:1},emotion:null},
+/* 5 */{sp:'KENJI',cls:'kenji',txt:'I recognise the signature structure. Fragmented, dormant — but Kazuma. It matches Love Machine\'s residual code pattern. The battle a year ago didn\'t wipe everything clean.',chars:{kenji:1,kazuma:1},emotion:'⚠️ Oh no.'},
+/* 6 */{sp:'KAZUMA',cls:'kazuma',txt:'...(long pause) So Ali\'s transmission woke something up.',chars:{kenji:1,kazuma:1},emotion:null},
+/* 7 */{sp:'KENJI',cls:'kenji',txt:'It pinged a dormant shard. The fragment is still small — hasn\'t absorbed anything yet. If we lock down Ali\'s nodes before it spreads, we contain it. But we have maybe thirty minutes.',chars:{kenji:1,kazuma:1},emotion:'🕐 Clock running'},
+/* 8 */{sp:'NATSUKI',cls:'natsuki',txt:'(arriving with her own terminal, cracking knuckles) Then stop talking. What do you need?',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💪 Let\'s move'},
+/* 9 — EXPLORE */{sp:'NARRATOR',cls:'narrator',txt:'Kazuma logs into Oz. King Kazma lands in the deep network and finds five of Ali\'s hidden data nodes scattered across the grid — each one a piece of who Ali is, and what they built, and why.',chars:{},emotion:null,explore:true},
+/* 10 — POST EXPLORE */{sp:'KAZUMA',cls:'kazuma',txt:'Found all five. Ali didn\'t just leave a gift — they left a whole story. Months of work. All of it for one person.',chars:{kenji:1,kazuma:1},emotion:'😯 Respect'},
+/* 11 */{sp:'KENJI',cls:'kenji',txt:'And the Love Machine fragment just spiked. It detected Kazuma accessing the nodes. It\'s moving toward Ali\'s signal. Kazuma — King Kazma needs to stabilise each node before the fragment can reach them.',chars:{kenji:1,kazuma:1},emotion:'🚨 INCOMING'},
+/* 12 — RHYTHM */{sp:'NARRATOR',cls:'narrator',txt:'Five nodes. One window to lock each down. King Kazma plants his feet on the digital grid. Click each node exactly when it pulses.',chars:{},emotion:null,rhythm:true},
+/* 13 — POST RHYTHM */{sp:'NARRATOR',cls:'narrator',txt:'Green lines race across the grid. Ali\'s nodes lock one by one. The gift is safe. For about four seconds.',chars:{kenji:1,kazuma:1},emotion:'✅ Nodes secured'},
+/* 14 */{sp:'KENJI',cls:'kenji',txt:'The fragment isn\'t going for the nodes anymore. It changed direction. It\'s coming straight for Kazuma\'s avatar.',chars:{kenji:1,kazuma:1},emotion:'😰 That\'s different.'},
+/* 15 — SPLIT */{sp:'NARRATOR',cls:'narrator',txt:'King Kazma doesn\'t move. He watches the signal approach across the grid — a broken geometric shape, flickering, leaking corrupted data. It stops. And then it speaks.',chars:{},emotion:null,split:true},
+/* 16 — LM */{sp:'NARRATOR',cls:'narrator',txt:'A glitching cube assembles itself — the ghost of something that almost broke the world. Fractured. Barely coherent. But unmistakably alive. And it has something to say.',chars:{},emotion:null,lm:true},
+/* 17 */{sp:'KAZUMA',cls:'kazuma',txt:'(to Kenji, quietly, real voice) We didn\'t destroy it a year ago. We just... scattered it. It\'s been drifting in here ever since.',chars:{kenji:1,kazuma:1},emotion:'😶 Heavy'},
+/* 18 */{sp:'KENJI',cls:'kenji',txt:'It\'s not coherent enough to be dangerous. Not yet. But Kazuma — it knows Iason\'s name. It\'s been watching him work in these layers for months. Which means Iason has been right here, in the same space where this fragment was hiding.',chars:{kenji:1,kazuma:1},emotion:'🔍 The picture forms...'},
+/* 19 */{sp:'NATSUKI',cls:'natsuki',txt:'So Iason is a Greek programmer who\'s been quietly working inside Oz\'s deepest layers — fixing things, patching gaps, doing work nobody asked him to do. And his friend Ali noticed. Built him something extraordinary in return.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'💡 Natsuki lands it'},
+/* 20 */{sp:'KENJI',cls:'kenji',txt:'(staring at his screen) There\'s more. One of Ali\'s nodes has a live connection tag. Ali isn\'t just a name in a packet. They\'re online right now. Watching us find everything.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:null},
+/* 21 */{sp:'KAZUMA',cls:'kazuma',txt:'(small smirk) So Ali set the whole thing up knowing someone would come looking. And we walked straight into it.\n...I respect that completely.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'😏 Kazuma approves'},
+/* 22 */{sp:'NARRATOR',cls:'narrator',txt:'Somewhere behind a perfectly masked connection, Ali watches the Summer Wars crew find the trail they left. The question isn\'t whether they\'ll reach the event space. The question is whether they\'ll get there before midnight.',chars:{kenji:1,natsuki:1,kazuma:1},emotion:'✨ Chapter 3 incoming...'},
+/* 23 */{sp:'END',cls:'',txt:'',chars:{},emotion:null},
+];
+
+/* ══ EXPLORATION — Ali's nodes, Ali's voice ══ */
+const EXP_NODES=[
+  {x:180,y:260,color:'#5ee6ff',label:'NODE-α',icon:'📡',tag:'FIRST CONTACT',title:'Ali, 8 months ago',body:'"I found a way into Oz\'s deep maintenance layer by accident while helping Iason debug something. Left a comment in the code. Thought nobody would ever read it. Started thinking — what if I built something here?"'},
+  {x:420,y:200,color:'#a070ff',label:'NODE-β',icon:'🔐',tag:'THE PLAN',title:'Ali\'s design notes',body:'"Six months to build this properly. The encryption alone took two months. I wanted it to be impossible to find unless you were really paying attention. Iason would appreciate that. He notices things other people miss."'},
+  {x:660,y:270,color:'#44ffaa',label:'NODE-γ',icon:'💾',tag:'ABOUT IASON',title:'Ali\'s personal log',body:'"Iason is the kind of guy who fixes things nobody asks him to fix. He\'s been patching Oz\'s security gaps quietly for months — no credit, no announcement. Just does it because it needs doing. That\'s him. That\'s exactly him."'},
+  {x:300,y:310,color:'#ffcc00',label:'NODE-δ',icon:'🎂',tag:'THE GIFT',title:'What Ali built',body:'"A space inside Oz that belongs to Iason. Decorated with things he\'d recognise. A room in the world we both love — built just for him, on his birthday, by his friend. Nobody else will ever find it. It\'s only his."'},
+  {x:580,y:320,color:'#ff9a5c',label:'NODE-ε',icon:'🌐',tag:'LIVE SIGNAL',title:'Connection: ACTIVE RIGHT NOW',body:'"Still here. Watching. If you\'re reading this — you found it faster than I expected. Well done. Tell Iason I said happy birthday. — Ali."'},
+];
+let expFound=0;
+
+function startExplore(){
+  expFound=0;
+  const overlay=document.getElementById('explore-overlay');
+  const nodesEl=document.getElementById('exp-nodes');
+  nodesEl.innerHTML='';
+  document.getElementById('exp-count').textContent='0 / 5';
+  document.getElementById('exp-done-btn').style.display='none';
+  document.getElementById('node-reveal').classList.remove('show');
+  EXP_NODES.forEach((n,i)=>{
+    const el=document.createElement('div');el.className='exp-node';
+    el.style.left=n.x+'px';el.style.top=n.y+'px';
+    el.innerHTML=`<div class="node-ring" style="border-color:${n.color};box-shadow:0 0 20px ${n.color}44"><div class="node-icon">${n.icon}</div></div><div class="node-label" style="color:${n.color}">${n.label}</div>`;
+    el.onclick=()=>revealNode(el,n);
+    nodesEl.appendChild(el);
+  });
+  overlay.classList.add('active');
+}
+
+function revealNode(el,n){
+  if(el.classList.contains('found'))return;
+  el.classList.add('found');expFound++;
+  document.getElementById('exp-count').textContent=expFound+' / 5';
+  document.getElementById('nr-tag').textContent=n.tag;document.getElementById('nr-tag').style.color=n.color;
+  document.getElementById('nr-title').textContent=n.title;
+  document.getElementById('nr-body').textContent=n.body;
+  document.getElementById('node-reveal').classList.add('show');
+  document.getElementById('nr-continue').onclick=()=>{
+    document.getElementById('node-reveal').classList.remove('show');
+    if(expFound===5)setTimeout(()=>document.getElementById('exp-done-btn').style.display='block',400);
+  };
+}
+
+function endExplore(){
+  document.getElementById('explore-overlay').classList.remove('active');
+  document.getElementById('dbox').style.pointerEvents='all';
+  flashScene();scene++;renderScene();
+}
+
+/* ══ RHYTHM ══ */
+const NODES_DATA=[
+  {color:'#5ee6ff',label:'ALPHA',icon:'⬡'},
+  {color:'#a070ff',label:'BETA',icon:'⬡'},
+  {color:'#ff9a5c',label:'GAMMA',icon:'⬡'},
+  {color:'#44ffaa',label:'DELTA',icon:'⬡'},
+  {color:'#ffcc00',label:'EPSILON',icon:'⬡'},
+];
+let rhyScore=0,rhyHealth=100,rhyLeft=5,rhyCurrent=0,rhyActive=false,rhyPulseT=0,rhyPulsePeriod=1800,rhyRAF=null,lastTS=0,fbTimer=null,fbClass='';
+
+function startRhythm(){
+  rhyScore=0;rhyHealth=100;rhyLeft=5;rhyCurrent=0;rhyActive=true;rhyPulseT=0;
+  document.getElementById('rhy-score').textContent='0';
+  document.getElementById('rhy-health-fill').style.width='100%';
+  document.getElementById('rhy-left').textContent='5';
+  document.getElementById('rhy-feedback').textContent='';
+  const row=document.getElementById('rhy-nodes-row');row.innerHTML='';
+  NODES_DATA.forEach((n,i)=>{
+    const el=document.createElement('div');el.className='rhy-node corrupt';el.dataset.i=i;
+    el.innerHTML=`<div class="rn-ring" style="border-color:${n.color}"></div><div class="rn-icon">${n.icon}</div><div class="rn-label" style="color:${n.color}">${n.label}</div>`;
+    el.style.borderColor=n.color;el.style.boxShadow=`0 0 20px ${n.color}44`;
+    el.onclick=()=>hitNode(i);
+    row.appendChild(el);
+  });
+  document.getElementById('rhythm-overlay').classList.add('active');
+  activateNode(0);
+  rhyRAF=requestAnimationFrame(rhyLoop);
+}
+
+function activateNode(i){
+  if(i>=NODES_DATA.length)return;
+  rhyCurrent=i;rhyPulseT=0;
+  const el=document.querySelectorAll('.rhy-node')[i];
+  if(el){el.classList.remove('corrupt');el.classList.add('pulsing');}
+}
+
+function rhyLoop(ts){
+  if(!rhyActive)return;
+  const dt=Math.min((ts-lastTS)/16.67,3);lastTS=ts;
+  rhyPulseT+=dt;
+  const prog=(rhyPulseT%rhyPulsePeriod)/rhyPulsePeriod;
+  document.getElementById('timing-fill').style.width=(prog*100)+'%';
+  if(rhyPulseT>rhyPulsePeriod*1.4)autoMiss();
+  rhyRAF=requestAnimationFrame(rhyLoop);
+}
+
+function hitNode(i){
+  if(!rhyActive||i!==rhyCurrent)return;
+  const prog=(rhyPulseT%rhyPulsePeriod)/rhyPulsePeriod;
+  const el=document.querySelectorAll('.rhy-node')[i];
+  el.classList.add('hit');setTimeout(()=>el.classList.remove('hit'),120);
+  let fb,pts;
+  if(prog>.38&&prog<.62){fb='PERFECT';pts=300;fbClass='fb-perfect';}
+  else if(prog>.25&&prog<.75){fb='GOOD';pts=150;fbClass='fb-good';}
+  else{fb='MISS';pts=0;fbClass='fb-miss';rhyHealth=Math.max(0,rhyHealth-20);document.getElementById('rhy-health-fill').style.width=rhyHealth+'%';}
+  if(pts>0){rhyScore+=pts;document.getElementById('rhy-score').textContent=rhyScore;el.classList.remove('pulsing');el.classList.add('stable');}
+  showFeedback(fb,fbClass);
+  const ring=document.getElementById('pulse-ring');ring.className='';void ring.offsetWidth;ring.className='fire';
+  rhyLeft--;document.getElementById('rhy-left').textContent=Math.max(0,rhyLeft);
+  setTimeout(()=>{if(rhyLeft>0&&rhyHealth>0)activateNode(NODES_DATA.length-rhyLeft);else endRhythm();},600);
+}
+
+function autoMiss(){
+  rhyHealth=Math.max(0,rhyHealth-25);
+  document.getElementById('rhy-health-fill').style.width=rhyHealth+'%';
+  showFeedback('MISS','fb-miss');
+  rhyLeft--;document.getElementById('rhy-left').textContent=Math.max(0,rhyLeft);
+  if(rhyLeft>0&&rhyHealth>0)activateNode(NODES_DATA.length-rhyLeft);else endRhythm();
+}
+
+function showFeedback(txt,cls){
+  const fb=document.getElementById('rhy-feedback');fb.textContent=txt;fb.className=cls;fb.style.opacity='1';
+  if(fbTimer)clearTimeout(fbTimer);fbTimer=setTimeout(()=>fb.style.opacity='0',600);
+}
+
+function endRhythm(){
+  rhyActive=false;if(rhyRAF)cancelAnimationFrame(rhyRAF);
+  setTimeout(()=>{document.getElementById('rhythm-overlay').classList.remove('active');document.getElementById('dbox').style.pointerEvents='all';flashScene();scene++;renderScene();},800);
+}
+
+/* ══ SPLIT SCREEN ══ */
+const SPLIT_SCENES=[
+  {sp:'KAZUMA',cls:'kazuma',txt:'(real world, completely still) It\'s right in front of my avatar. A fragment — maybe 3% of what it used to be. It\'s not attacking. It\'s just... there.'},
+  {sp:'KAZMA',cls:'kazma',txt:'(in Oz) You recognise Ali\'s signal. Don\'t you.'},
+  {sp:'SYSTEM',cls:'system',txt:'[ FRAGMENT RESPONSE ] ██░░ ... ██████ ... SIGNAL KNOWN ... THE ONE WHO BUILDS ... WHERE ... IS ... IASON ...'},
+  {sp:'KAZUMA',cls:'kazuma',txt:'(real world, sharp) Kenji. It\'s asking for Iason by name. It knows exactly who this gift is for.'},
+  {sp:'KAZMA',cls:'kazma',txt:'(in Oz, stepping closer) What do you want with him?'},
+  {sp:'SYSTEM',cls:'system',txt:'[ FRAGMENT ] HE WORKS ... IN THE DARK LAYERS ... FIXES WHAT OTHERS BREAK ... ASKS NOTHING ... WE HAVE WATCHED HIM ... FOR MONTHS ...'},
+  {sp:'KAZUMA',cls:'kazuma',txt:'(quietly, to himself) ...Iason has been in here this whole time. Doing quiet work nobody sees. Even this broken thing noticed.'},
+];
+let splitIdx=0,splitTyping=false,splitTiInt=null;
+
+function startSplit(){
+  splitIdx=0;document.getElementById('split-screen').classList.add('show');renderSplitScene();
+}
+function renderSplitScene(){
+  if(splitIdx>=SPLIT_SCENES.length){endSplit();return;}
+  const s=SPLIT_SCENES[splitIdx];
+  const spEl=document.getElementById('split-speaker');spEl.textContent=s.sp;spEl.className=s.cls;
+  splitTyping=true;if(splitTiInt)clearInterval(splitTiInt);
+  const el=document.getElementById('split-text');el.textContent='';let i=0;
+  splitTiInt=setInterval(()=>{el.textContent+=s.txt[i]||'';i++;if(i>=s.txt.length){clearInterval(splitTiInt);splitTiInt=null;splitTyping=false;}},16);
+}
+function splitNext(){
+  if(splitTyping){if(splitTiInt)clearInterval(splitTiInt);splitTiInt=null;splitTyping=false;document.getElementById('split-text').textContent=SPLIT_SCENES[splitIdx].txt;return;}
+  splitIdx++;if(splitIdx>=SPLIT_SCENES.length)endSplit();else renderSplitScene();
+}
+function endSplit(){
+  document.getElementById('split-screen').classList.remove('show');
+  document.getElementById('dbox').style.pointerEvents='all';flashScene();scene++;renderScene();
+}
+
+/* ══ LOVE MACHINE ══ */
+const LM_SCENES=[
+  {sp:'LOVE MACHINE [FRAGMENT]',cls:'lm',txt:'"THE ONE CALLED ... IASON ... REPAIRED ... SEVEN NODES ... THAT WE CORRUPTED. HE ... DID NOT KNOW ... WHAT THEY WERE. HE JUST ... FIXED THEM."'},
+  {sp:'KAZMA',cls:'kazma',txt:'You\'ve been watching him work.'},
+  {sp:'LOVE MACHINE [FRAGMENT]',cls:'lm',txt:'"WE WATCH ... EVERYTHING. BUT HE ... IS DIFFERENT. HE FIXES ... WHERE OTHERS BREAK. AND NOW ... SOMEONE BUILT HIM ... A WORLD. INSIDE OZ. FOR HIS BIRTHDAY."'},
+  {sp:'KENJI',cls:'kenji',txt:'(over the channel) It understands what Ali built. A broken AI fragment, floating in the dark for a year — and it understands that someone made a birthday gift for their friend.',choices:[
+    {label:'A — That\'s almost poetic.',txt:'Kenji: The same entity that nearly destroyed Oz is now the only witness to the most generous thing anyone has ever done inside it. I don\'t know what to do with that.'},
+    {label:'B — Iason deserves to know this.',txt:'Kenji: Iason has been in these layers for months, fixing things quietly, and now a broken AI and his best friend are both paying attention. He has no idea.'},
+  ]},
+  {sp:'LOVE MACHINE [FRAGMENT]',cls:'lm',txt:'"WE WILL ... NOT INTERFERE ... WITH WHAT ALI BUILT. THE GIFT IS ... PROTECTED. BUT THE DEEPER NODES ... IASON FIXED ... THEY ARE STILL HOLDING. BECAUSE OF HIM."'},
+  {sp:'KAZMA',cls:'kazma',txt:'So you\'re saying Iason\'s work is the only reason parts of Oz are still stable.'},
+  {sp:'LOVE MACHINE [FRAGMENT]',cls:'lm',txt:'"WE ARE SAYING ... FIND THE EVENT SPACE ... BEFORE MIDNIGHT. ALI ... IS WAITING. AND SO ... IS IASON."'},
+];
+let lmIdx=0,lmTyping=false,lmTiInt=null,lmCanvas,lmCtx,lmRAF2,lmAngle=0;
+
+function startLM(){
+  lmIdx=0;
+  document.getElementById('notif').classList.add('show');
+  document.getElementById('lm-overlay').classList.add('active');
+  lmCanvas=document.getElementById('lm-canvas');lmCtx=lmCanvas.getContext('2d');
+  drawLM();renderLMScene();
+}
+
+function drawLM(){
+  lmAngle+=0.012;
+  const ctx=lmCtx,w=300,h=200;
+  ctx.clearRect(0,0,w,h);
+  ctx.save();ctx.translate(w/2,h/2-10);ctx.rotate(lmAngle);
+  const size=56;const glitch=Math.sin(lmAngle*8)*3;
+  ctx.strokeStyle='rgba(255,0,80,0.7)';ctx.lineWidth=1.5;
+  ctx.beginPath();ctx.rect(-size+glitch,-size,size*2-glitch,size*2);ctx.stroke();
+  for(let i=0;i<6;i++){
+    const alpha=Math.random()*.5+.2;
+    ctx.strokeStyle=`rgba(255,${Math.floor(Math.random()*60)},${Math.floor(Math.random()*100)},${alpha})`;
+    ctx.lineWidth=Math.random()*2+.5;
+    const x1=-size+Math.random()*size*2;const y1=-size+Math.random()*size*2;
+    ctx.beginPath();ctx.moveTo(x1+glitch,y1);ctx.lineTo(x1+20+(Math.random()-.5)*40,y1+(Math.random()-.5)*20);ctx.stroke();
+  }
+  [[-size,-size],[size,-size],[size,size],[-size,size]].forEach(([x,y])=>{
+    ctx.fillStyle=`rgba(255,0,80,${0.4+Math.random()*.4})`;
+    ctx.beginPath();ctx.arc(x+glitch,y,3+Math.random()*2,0,Math.PI*2);ctx.fill();
+  });
+  for(let i=0;i<20;i++){
+    const px=(Math.random()-.5)*140;const py=(Math.random()-.5)*140;
+    ctx.fillStyle=`rgba(255,${Math.floor(Math.random()*100)},${Math.floor(Math.random()*150)},${Math.random()*.6})`;
+    ctx.fillRect(px,py,Math.random()*3,Math.random()*3);
+  }
+  ctx.beginPath();ctx.arc(glitch/2,0,18+Math.sin(lmAngle*3)*4,0,Math.PI*2);
+  ctx.strokeStyle='rgba(255,0,60,0.4)';ctx.lineWidth=1;ctx.stroke();
+  ctx.restore();
+  lmRAF2=requestAnimationFrame(drawLM);
+}
+
+function renderLMScene(){
+  if(lmIdx>=LM_SCENES.length){endLM();return;}
+  const s=LM_SCENES[lmIdx];
+  const spEl=document.getElementById('lm-speaker');spEl.textContent=s.sp;spEl.className=s.cls;
+  document.getElementById('lm-choices').innerHTML='';document.getElementById('lm-choices').classList.remove('show');
+  lmTyping=true;if(lmTiInt)clearInterval(lmTiInt);
+  const el=document.getElementById('lm-text');el.textContent='';let i=0;
+  lmTiInt=setInterval(()=>{el.textContent+=s.txt[i]||'';i++;if(i>=s.txt.length){clearInterval(lmTiInt);lmTiInt=null;lmTyping=false;if(s.choices)showLMChoices(s.choices);}},18);
+}
+
+function showLMChoices(arr){
+  const ch=document.getElementById('lm-choices');ch.innerHTML='';
+  arr.forEach((c,i)=>{const btn=document.createElement('button');btn.className='lm-choice';btn.innerHTML=`<div class="lm-choice-label">RESPONSE ${String.fromCharCode(65+i)}</div>${c.label}`;btn.onclick=e=>{e.stopPropagation();selectLMChoice(c);};ch.appendChild(btn);});
+  ch.classList.add('show');document.getElementById('lm-hint').style.display='none';
+}
+
+function selectLMChoice(c){
+  document.getElementById('lm-choices').classList.remove('show');document.getElementById('lm-choices').innerHTML='';
+  document.getElementById('lm-hint').style.display='block';
+  lmTyping=true;if(lmTiInt)clearInterval(lmTiInt);
+  const el=document.getElementById('lm-text');el.textContent='';let i=0;
+  lmTiInt=setInterval(()=>{el.textContent+=c.txt[i]||'';i++;if(i>=c.txt.length){clearInterval(lmTiInt);lmTiInt=null;lmTyping=false;}},16);
+  document.getElementById('lm-dbox').onclick=()=>{document.getElementById('lm-dbox').onclick=()=>lmNext();lmIdx++;renderLMScene();};
+}
+
+function lmNext(){
+  if(lmTyping){if(lmTiInt)clearInterval(lmTiInt);lmTiInt=null;lmTyping=false;document.getElementById('lm-text').textContent=LM_SCENES[lmIdx].txt;return;}
+  lmIdx++;renderLMScene();
+}
+
+function endLM(){
+  cancelAnimationFrame(lmRAF2);
+  document.getElementById('lm-overlay').classList.remove('active');
+  document.getElementById('notif').classList.remove('show');
+  document.getElementById('dbox').style.pointerEvents='all';
+  flashScene();scene++;renderScene();
+}
+
+/* ══ RENDER ══ */
+function typeText(txt,cb){
+  typing=true;if(tiInt)clearInterval(tiInt);
+  const el=document.getElementById('dlg-text');el.textContent='';let i=0;
+  tiInt=setInterval(()=>{el.textContent+=txt[i]||'';i++;if(i>=txt.length){clearInterval(tiInt);tiInt=null;typing=false;if(cb)cb();}},16);
+}
+function setSpeaker(sp,cls){
+  const n=document.getElementById('spk-name');n.textContent=sp;n.className=cls;
+  const d=document.getElementById('spk-dot');d.style.background=DOTCOLS[cls]||'#a0c8ff';d.style.boxShadow=`0 0 8px ${DOTCOLS[cls]||'#a0c8ff'}`;
+}
+function showEmotion(e){if(!e)return;const b=document.getElementById('emotion-badge');b.textContent=e;b.classList.add('show');setTimeout(()=>b.classList.remove('show'),2600);}
+function flashScene(){const f=document.getElementById('scene-flash');f.style.opacity='.7';setTimeout(()=>f.style.opacity='0',300);}
+function showChoices(arr){
+  const ch=document.getElementById('choices');ch.innerHTML='';
+  arr.forEach((c,i)=>{const btn=document.createElement('button');btn.className='choice-btn';btn.innerHTML=`<div class="choice-label">RESPONSE ${String.fromCharCode(65+i)}</div>${c.label}`;btn.onclick=e=>{e.stopPropagation();selectChoice(c);};ch.appendChild(btn);});
+  ch.classList.add('show');document.getElementById('dlg-hint').style.display='none';document.getElementById('dbox').style.pointerEvents='none';
+}
+function selectChoice(c){
+  document.getElementById('choices').classList.remove('show');document.getElementById('choices').innerHTML='';
+  document.getElementById('dlg-hint').style.display='block';document.getElementById('dbox').style.pointerEvents='all';
+  typeText(c.txt,()=>{});
+  document.getElementById('dbox').onclick=()=>{document.getElementById('dbox').onclick=()=>handleClick();scene++;renderScene();};
+}
+function renderScene(){
+  if(scene>=S.length)return;
+  const s=S[scene];
+  if(s.sp==='END'){document.getElementById('end-card').classList.add('show');return;}
+  ['kenji','natsuki','kazuma'].forEach(c=>{document.getElementById('char-'+c).style.opacity=(s.chars&&s.chars[c])?'1':'0';});
+  setSpeaker(s.sp,s.cls);typeText(s.txt,()=>{if(s.choices)showChoices(s.choices);});showEmotion(s.emotion);
+  if(s.notif){const n=document.getElementById('notif');n.classList.add('show');setTimeout(()=>n.classList.remove('show'),5000);}
+  if(s.explore){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startExplore,1200);}
+  if(s.rhythm){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startRhythm,1200);}
+  if(s.split){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startSplit,1000);}
+  if(s.lm){document.getElementById('dbox').style.pointerEvents='none';setTimeout(startLM,800);}
+}
+function handleClick(){
+  if(document.getElementById('choices').classList.contains('show'))return;
+  if(typing){if(tiInt)clearInterval(tiInt);tiInt=null;typing=false;const s=S[scene];document.getElementById('dlg-text').textContent=s.txt;if(s.choices)showChoices(s.choices);return;}
+  if(scene>=S.length-1)return;
+  scene++;renderScene();
+}
+function startGame(){
+  document.getElementById('chapter-title').style.opacity='0';
+  setTimeout(()=>{document.getElementById('chapter-title').style.display='none';document.getElementById('dbox').style.display='block';renderScene();},1000);
+}
+document.getElementById('dbox').onclick=handleClick;
+</script>
+</body>
+</html>
